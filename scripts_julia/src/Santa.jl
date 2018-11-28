@@ -18,24 +18,20 @@ struct City
     y::Float64
 end
 
+City(i::Int, x::Float64, y::Float64) = City(i, isprime(i), x, y)
+
+City(i::AbstractString, x::AbstractString, y::AbstractString) = City(parse(Int, i), parse(Float64, x), parse(Float64, y))
+
+# /!\ Assume that the input file is sorted (city 0 is on the second line)
+read_cities(fp::AbstractString) = map(l -> City(split(l, ",")...), readlines(fp)[2:end])
+
+# /!\ Assume that `cities` is sorted (first city is city 0)
+read_path(cities::Vector{City}, fp::AbstractString) = map(x -> cities[parse(Int, x)+1], readlines(fp)[2:end])
+
 distance(a::City, b::City) = sqrt((a.x-b.x)^2+(a.y-b.y)^2)
 
-function read_cities(fp::AbstractString)
-    cities = Vector{City}()
-    for line in readlines(fp)[2:end]
-        i, x, y = map(x -> parse(Float64, x), split(line, ","))
-        push!(cities, City(Int(i), isprime(Int(i)), x, y))
-    end
-    cities
-end
-
-function read_path(cities::Vector{City}, fp::AbstractString)
-    lines = readlines(fp)[2:end]
-    map(x -> cities[parse(Int, x)+1], lines)
-end
-
 function score(path::Vector{City})
-    @assert (path[1].i == 0) && (path[end].i == 0)
+    @assert path[1].i == path[end].i == 0
     dist = 0.0
     @inbounds for i in 1:length(path)-1
         if (i % 10 == 0) && !path[i].p
