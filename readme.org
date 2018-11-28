@@ -1,0 +1,22 @@
+* Traveling Santa 2018 - Prime Paths
+
+#+BEGIN_QUOTE
+https://www.kaggle.com/c/traveling-santa-2018-prime-paths/leaderboard
+#+END_QUOTE
+
+
+
+** Best Approach so far 
+
+What worked the best up until now was the TSP Solver (cf [[file:tsp_solver]]).
+
+I tried various other approches: Greedy, GAs, Random Search, the tsp solver outperformed all of them
+by far.
+
+
+It seems that there is a positive correlation between the running time of the solver and the 
+score of the solutions generated. 
+
+
+We should consider building a distributed pipeline in which we would have several instances of TSP
+generating solutions used as input in other algorithms such as local search. 
