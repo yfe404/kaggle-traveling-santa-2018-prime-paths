@@ -1,9 +1,21 @@
 
-```
-UInt32[0xfd739d89, 0xdf3824c4, 0x78037b18, 0x7e10b0f5]
-2006.0 iterations/s] 7324700/10000000 score = 1.4184348143132916e8
-```
+### Install dependencies (first time only)
 
 ```bash
-julia -O3 --check-bounds=no --math-mode=fast swapper.jl ../../cities.csv ../scripts/genetic_pool/1517028.csv 10000000
+julia -e 'import Pkg; Pkg.activate("."); Pkg.instantiate()'
 ```
+
+### K-NN opt
+
+```bash
+julia -O3 knn_opt.jl ../input/cities.csv kaggle_submission_file.csv
+# Will output to sub_knn_opt_$score.csv
+```
+
+Config
+```julia
+# Edit the end of knn_opt.jl
+path = nn_opt(path, collect(10:10:length(path)-1), 100); println()                                                                                           
+path = nn_opt(path, collect(2:length(path)-1), 25); println()   
+```
+
