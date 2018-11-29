@@ -30,7 +30,7 @@ function nn_opt(init_path::Vector{City}, indices::Vector{Int}, K::Int)
     path = copy(init_path)
     best = score(path)
     for (zzz, i) in enumerate(indices)
-        print("\33[2K [$K-NN] $(zzz)/$(length(indices)) score = $(best)\r")
+        zzz % 10 == 0 && print("\33[2K [$K-NN] $(zzz)/$(length(indices)) score = $(best)\r")
         bv, bj = best, 0
         for (_, j) in find_closest_cities(path, path[i], K)
             path[j].i == 0 && continue
@@ -56,5 +56,9 @@ path = read_path(cities, ARGS[2])
 
 println("Original score: $(score(path))")
 
-path = nn_opt(path, collect(10:10:length(path)-1), 25)
-path = nn_opt(path, collect(2:length(path)-1), 5)
+path = nn_opt(path, collect(10:10:length(path)-1), 100); println()
+path = nn_opt(path, collect(2:length(path)-1), 25); println()
+
+out = vcat("Path", map(c -> c.i, path))
+write("sub_knn_opt_$(score(path)).csv", join(out, "\n"))
+
