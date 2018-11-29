@@ -15,7 +15,7 @@ read_cities(fp::AbstractString) = map(l -> City(split(l, ",")...), readlines(fp)
 # /!\ Assume that `cities` is sorted (first city is city 0)
 read_path(cities::Vector{City}, fp::AbstractString) = map(x -> cities[parse(Int, x)+1], readlines(fp)[2:end])
 
-distance(a::City, b::City) = sqrt((a.x-b.x)^2+(a.y-b.y)^2)
+@fastmath distance(a::City, b::City) = sqrt((a.x-b.x)^2+(a.y-b.y)^2)
 
 @views random_path(cities::Vector{City}) = vcat(cities[1], shuffle(cities[2:end]), cities[1])
 
