@@ -3,7 +3,6 @@ push!(LOAD_PATH, "src/")
 
 import Pkg; Pkg.activate(".")
 
-using ProgressMeter
 using Random
 using Santa
 
@@ -57,7 +56,7 @@ path = read_path(cities, ARGS[2])
 println("Original score: $(score(path))")
 
 path = nn_opt(path, collect(10:10:length(path)-1), 100); println()
-path = nn_opt(path, collect(2:length(path)-1), 25); println()
+path = nn_opt(path, collect(length(path)-1:-1:2), 100); println()
 
 out = vcat("Path", map(c -> c.i, path))
 write("sub_knn_opt_$(score(path)).csv", join(out, "\n"))
