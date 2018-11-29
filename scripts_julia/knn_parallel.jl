@@ -39,11 +39,11 @@ function nn_opt(init_path::Vector{City}, start::Int, K::Int)
     path = copy(init_path)
     best = score_partial(path, start)
     println(best)
-    for i = 1:length(path)
+    for i = 2:length(path)-1 # Boundaries are left untouched
         i % 1000 == 0 && println("$(i)/$(length(path))")
         bv, bj = best, 0
         for (_, j) in find_closest_cities(path, path[i], K)
-            path[j].i == 0 && continue
+            ((j == 1) || (j == length(path))) && continue # Boundaries are left untouched
             reverse!(path, min(i,j), max(i,j))
             s  = score_partial(path, start)
             if s < bv
