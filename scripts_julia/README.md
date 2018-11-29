@@ -14,7 +14,7 @@ julia -O3 knn_opt.jl ../input/cities.csv kaggle_submission_file.csv
 
 Config
 ```julia
-# ...
+# Edit the end of knn_opt.jl
 path = nn_opt(path, collect(10:10:length(path)-1), 100); println()                                                                                           
 path = nn_opt(path, collect(2:length(path)-1), 25); println()   
 ```
