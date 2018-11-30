@@ -145,7 +145,7 @@ float fitness(const vector<int>& path, const vector<pair<double,double > > &coor
   double distance = 0;
   int size = path.size();
 
-  for (int i = start+1; i < end+1; ++i) {
+  for (int i = start+1; i < size; ++i) {
     float edgeDistance = 0.0;
     
     edgeDistance = sqrt(pow((coords[path[i-1]].first - coords[path[i]].first), 2) + 
@@ -157,7 +157,6 @@ float fitness(const vector<int>& path, const vector<pair<double,double > > &coor
 
     distance += edgeDistance;
   }
-
     
     return distance;
 }
@@ -189,9 +188,10 @@ int main() {
 
   int k = 0;
   while (hasImproved) {
-    for (int iGene1 = 1; iGene1 < path.size() - 1; iGene1++)
+    for (int iGene1 = 1; iGene1 < path.size() - 1; iGene1++) {
+            cout << iGene1 << endl;
       for (int iGene2 = iGene1 + 1; iGene2 < path.size(); iGene2++) {
-
+	//	cout << iGene2 << endl;
 	timestamp_t t0 = get_timestamp();
 	double prevCost = fitness(path, coords, primes, iGene1-1, iGene2+1, iGene1-1);
 	twoOptSwap(path, swappedGenes, iGene1, iGene2);
@@ -212,8 +212,7 @@ int main() {
 	}
 	else { hasImproved = false; }
 
-		k++;
-	if (k == 100000) exit(0);
+      }
 
       }
   }
