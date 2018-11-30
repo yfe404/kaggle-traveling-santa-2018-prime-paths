@@ -201,7 +201,7 @@ int main() {
   
   vector<int> swappedGenes(path.size());
 
-  
+  int k = 0;
   while (hasImproved) {
     for (int iGene1 = 1; iGene1 < path.size() - 1; iGene1++)
       for (int iGene2 = iGene1 + 1; iGene2 < path.size(); iGene2++) {
@@ -211,25 +211,25 @@ int main() {
 	twoOptSwap(path, swappedGenes, iGene1, iGene2);
 	double newCost = fitness(swappedGenes, coords, primes, iGene1-1, iGene2+1, iGene1-1);
 
-	timestamp_t t1 = get_timestamp();
-
-	double secs = (t1 - t0) / 1000000.0L;
-
-	cout << "found in " << secs << " seconds" << endl;
-
-	cout << prevCost << endl;
-	cout << newCost << endl;
-
-	exit(0);
 
 	
-	if (swappedGenesFitness < _fitness) {
-	  path.swap(swappedGenes);
-	  _fitness = swappedGenesFitness;
+	if (newCost < prevCost) {
+	  std::cout << std::fixed << std::setprecision(2);
+	  cout << "Cost on portion (old) " << prevCost << endl;
+	  cout << "Cost on portion (new) " << newCost << endl;
+
+	   path.swap(swappedGenes);
+	   cout << "Old overall fitness " << _fitness << endl ;
+	  _fitness = fitness(path, coords, primes);
+	    prevCost = newCost;
 	  hasImproved = true;
-	  cout << _fitness << endl;
+	  cout << "New overall fitness " << _fitness << endl << endl;
 	}
 	else { hasImproved = false; }
+
+		k++;
+	if (k == 10000) exit(0);
+
       }
   }
   
