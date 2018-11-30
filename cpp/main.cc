@@ -14,13 +14,42 @@
 using namespace std;
 
 
+int isPrime(int n){
+    int i;
+
+    if (n < 2)
+      return 0;
+    
+    if (n==2)
+        return 1;
+
+    if (n%2==0)
+        return 0;
+
+    for (i=3;i<=sqrt(n);i+=2)
+        if (n%i==0)
+            return 0;
+
+    return 1;
+}
+
+vector<int> read_primes() {
+  int n;
+  vector<int> primes;
+
+  for (int i = 0; i < 200000; ++i) {
+    primes.push_back(isPrime(i));
+  }
+
+  return primes;
+}
 
 vector<pair<double,double > > read_problem() {
   vector<int> id;
   vector<pair<double,double> > coord;
 
-    int n;
-    double x, y;
+  int n;
+  double x, y;
 
     ifstream infile("kaggle.tsp");
 
@@ -61,24 +90,6 @@ vector<int> read_path() {
 }
 
 
-int isPrime(int n){
-    int i;
-
-    if (n < 2)
-      return 0;
-    
-    if (n==2)
-        return 1;
-
-    if (n%2==0)
-        return 0;
-
-    for (i=3;i<=sqrt(n);i+=2)
-        if (n%i==0)
-            return 0;
-
-    return 1;
-}
 
 
  #include <sys/time.h>
@@ -93,8 +104,18 @@ int isPrime(int n){
     }
 
 
+double distanceEdges(const vector<int>& path, const vector<pair<double,double > > &coords, int start, int end) {
 
+  float discount = 1.0 + 0.1 * ((!isPrime(path[start])) && (path[end] % 10 == 0));
+  float edgeDistance = 0.0;
 
+  edgeDistance = sqrt(pow((coords[path[start]].first - coords[path[end]].first), 2) + 
+		      pow((coords[path[start]].second - coords[path[end]].second), 2));
+
+  edgeDistance *= discount;
+
+  return edgeDistance;
+}
 
 
 
@@ -132,31 +153,25 @@ void twoOptSwap(
 }
 
 
-float fitness(const vector<int>& path, const vector<pair<double,double > > &coords) {
+float fitness(const vector<int>& path, const vector<pair<double,double > > &coords, const vector<int>& primes, int step=0) {
 
   //  int currentIndex = 0;
   double distance = 0;
   int size = path.size();
 
-  float discount = 0.0;
-  float edgeDistance = 0.0;
-
-  //  timestamp_t t0 = get_timestamp();
   for (int i = 1; i < size; ++i) {
+    float edgeDistance = 0.0;
     
-    if ((((i)%10) == 0) && (!isPrime(path[i-1]))) discount = 1.1;
-
     edgeDistance = sqrt(pow((coords[path[i-1]].first - coords[path[i]].first), 2) + 
 		      pow((coords[path[i-1]].second - coords[path[i]].second), 2));
 
-    edgeDistance *= discount;
+    if ((((i+step)%10) == 0) && (!primes[path[(i+step)-1]])) {
+      edgeDistance *= 1.1;
+    }
+
     distance += edgeDistance;
-    discount = 1.0;
   }
 
-  // timestamp_t t1 = get_timestamp();
-
-  //double secs = (t1 - t0) / 1000000.0L;
     
     return distance;
 }
@@ -166,24 +181,45 @@ int main() {
 
   auto path = read_path();
   auto coords = read_problem();
+  auto primes = read_primes();
 
   /*======================================================================================================================================================================================================== LOCAL SEARCH ======================================================================================================================================================================================================== */
 
-  float _fitness = fitness(path, coords);
+  float _fitness = 0.0;
   bool hasImproved = true;
   double swappedGenesFitness = 0.0;
 
+  timestamp_t t0 = get_timestamp();
+  _fitness = fitness(path, coords, primes);
+  timestamp_t t1 = get_timestamp();
 
-  cout << "Fitness score of initial genetic sequence: " << _fitness << endl;  
+  double secs = (t1 - t0) / 1000000.0L;
+
+
+  cout << "Fitness score of initial genetic sequence: " << _fitness << endl;
+  cout << "found in " << secs << " seconds" << endl;
   
   vector<int> swappedGenes(path.size());
 
+  double prevEdge1Cost = 0.0;
+  double prevEdge2Cost = 0.0;
+
+  
   while (hasImproved) {
     for (int iGene1 = 1; iGene1 < path.size() - 1; iGene1++)
       for (int iGene2 = iGene1 + 1; iGene2 < path.size(); iGene2++) {
 	twoOptSwap(path, swappedGenes, iGene1, iGene2);
-	swappedGenesFitness = fitness(swappedGenes, coords);
+	//	swappedGenesFitness = fitness(swappedGenes, coords);
 
+	prevEdge1Cost = distanceEdges(path, coords, iGene1, iGene2);
+	prevEdge2Cost = distanceEdges(swappedGenes, coords, iGene1, iGene2);
+	
+	cout << prevEdge1Cost << endl;
+	cout << prevEdge2Cost << endl;
+
+	exit(0);
+
+	
 	if (swappedGenesFitness < _fitness) {
 	  path.swap(swappedGenes);
 	  _fitness = swappedGenesFitness;
