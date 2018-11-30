@@ -7,7 +7,7 @@
 #include <iterator>
 #include <cassert>
 #include <sstream>
-
+#include <sys/time.h>
 #include <cmath>
 
 
@@ -92,7 +92,7 @@ vector<int> read_path() {
 
 
 
- #include <sys/time.h>
+
     typedef unsigned long long timestamp_t;
 
     static timestamp_t
@@ -102,20 +102,6 @@ vector<int> read_path() {
       gettimeofday (&now, NULL);
       return  now.tv_usec + (timestamp_t)now.tv_sec * 1000000;
     }
-
-
-double distanceEdges(const vector<int>& path, const vector<pair<double,double > > &coords, int start, int end) {
-
-  float discount = 1.0 + 0.1 * ((!isPrime(path[start])) && (path[end] % 10 == 0));
-  float edgeDistance = 0.0;
-
-  edgeDistance = sqrt(pow((coords[path[start]].first - coords[path[end]].first), 2) + 
-		      pow((coords[path[start]].second - coords[path[end]].second), 2));
-
-  edgeDistance *= discount;
-
-  return edgeDistance;
-}
 
 
 
@@ -159,7 +145,7 @@ float fitness(const vector<int>& path, const vector<pair<double,double > > &coor
   double distance = 0;
   int size = path.size();
 
-  for (int i = start+1; i < end; ++i) {
+  for (int i = start+1; i < end+1; ++i) {
     float edgeDistance = 0.0;
     
     edgeDistance = sqrt(pow((coords[path[i-1]].first - coords[path[i]].first), 2) + 
@@ -195,7 +181,7 @@ int main() {
 
   double secs = (t1 - t0) / 1000000.0L;
 
-
+  std::cout << std::fixed << std::setprecision(2);
   cout << "Fitness score of initial genetic sequence: " << _fitness << endl;
   cout << "found in " << secs << " seconds" << endl;
   
@@ -210,7 +196,6 @@ int main() {
 	double prevCost = fitness(path, coords, primes, iGene1-1, iGene2+1, iGene1-1);
 	twoOptSwap(path, swappedGenes, iGene1, iGene2);
 	double newCost = fitness(swappedGenes, coords, primes, iGene1-1, iGene2+1, iGene1-1);
-
 
 	
 	if (newCost < prevCost) {
@@ -228,7 +213,7 @@ int main() {
 	else { hasImproved = false; }
 
 		k++;
-	if (k == 10000) exit(0);
+	if (k == 100000) exit(0);
 
       }
   }
