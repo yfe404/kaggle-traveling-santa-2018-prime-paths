@@ -153,13 +153,13 @@ void twoOptSwap(
 }
 
 
-float fitness(const vector<int>& path, const vector<pair<double,double > > &coords, const vector<int>& primes, int step=0) {
+float fitness(const vector<int>& path, const vector<pair<double,double > > &coords, const vector<int>& primes, int start=0, int end=197769, int step=0) {
 
   //  int currentIndex = 0;
   double distance = 0;
   int size = path.size();
 
-  for (int i = 1; i < size; ++i) {
+  for (int i = start+1; i < end; ++i) {
     float edgeDistance = 0.0;
     
     edgeDistance = sqrt(pow((coords[path[i-1]].first - coords[path[i]].first), 2) + 
@@ -201,21 +201,24 @@ int main() {
   
   vector<int> swappedGenes(path.size());
 
-  double prevEdge1Cost = 0.0;
-  double prevEdge2Cost = 0.0;
-
   
   while (hasImproved) {
     for (int iGene1 = 1; iGene1 < path.size() - 1; iGene1++)
       for (int iGene2 = iGene1 + 1; iGene2 < path.size(); iGene2++) {
-	twoOptSwap(path, swappedGenes, iGene1, iGene2);
-	//	swappedGenesFitness = fitness(swappedGenes, coords);
 
-	prevEdge1Cost = distanceEdges(path, coords, iGene1, iGene2);
-	prevEdge2Cost = distanceEdges(swappedGenes, coords, iGene1, iGene2);
-	
-	cout << prevEdge1Cost << endl;
-	cout << prevEdge2Cost << endl;
+	timestamp_t t0 = get_timestamp();
+	double prevCost = fitness(path, coords, primes, iGene1-1, iGene2+1, iGene1-1);
+	twoOptSwap(path, swappedGenes, iGene1, iGene2);
+	double newCost = fitness(swappedGenes, coords, primes, iGene1-1, iGene2+1, iGene1-1);
+
+	timestamp_t t1 = get_timestamp();
+
+	double secs = (t1 - t0) / 1000000.0L;
+
+	cout << "found in " << secs << " seconds" << endl;
+
+	cout << prevCost << endl;
+	cout << newCost << endl;
 
 	exit(0);
 
