@@ -411,3 +411,5 @@ $RECYCLE.BIN/
 *.lnk
 
 # End of https://www.gitignore.io/api/vim,c++,cmake,emacs,linux,macos,julia,python,pycharm,windows,notepadpp,powershell,jupyternotebook
+
+/input/
