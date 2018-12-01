@@ -7,7 +7,7 @@
 #include <iterator>
 #include <cassert>
 #include <sstream>
-
+#include <sys/time.h>
 #include <cmath>
 
 
@@ -92,7 +92,7 @@ vector<int> read_path() {
 
 
 
- #include <sys/time.h>
+
     typedef unsigned long long timestamp_t;
 
     static timestamp_t
@@ -102,20 +102,6 @@ vector<int> read_path() {
       gettimeofday (&now, NULL);
       return  now.tv_usec + (timestamp_t)now.tv_sec * 1000000;
     }
-
-
-double distanceEdges(const vector<int>& path, const vector<pair<double,double > > &coords, int start, int end) {
-
-  float discount = 1.0 + 0.1 * ((!isPrime(path[start])) && (path[end] % 10 == 0));
-  float edgeDistance = 0.0;
-
-  edgeDistance = sqrt(pow((coords[path[start]].first - coords[path[end]].first), 2) + 
-		      pow((coords[path[start]].second - coords[path[end]].second), 2));
-
-  edgeDistance *= discount;
-
-  return edgeDistance;
-}
 
 
 
@@ -159,7 +145,7 @@ float fitness(const vector<int>& path, const vector<pair<double,double > > &coor
   double distance = 0;
   int size = path.size();
 
-  for (int i = start+1; i < end; ++i) {
+  for (int i = start+1; i < size; ++i) {
     float edgeDistance = 0.0;
     
     edgeDistance = sqrt(pow((coords[path[i-1]].first - coords[path[i]].first), 2) + 
@@ -171,7 +157,6 @@ float fitness(const vector<int>& path, const vector<pair<double,double > > &coor
 
     distance += edgeDistance;
   }
-
     
     return distance;
 }
@@ -195,41 +180,40 @@ int main() {
 
   double secs = (t1 - t0) / 1000000.0L;
 
-
+  std::cout << std::fixed << std::setprecision(2);
   cout << "Fitness score of initial genetic sequence: " << _fitness << endl;
   cout << "found in " << secs << " seconds" << endl;
   
   vector<int> swappedGenes(path.size());
 
-  
+  int k = 0;
   while (hasImproved) {
-    for (int iGene1 = 1; iGene1 < path.size() - 1; iGene1++)
+    for (int iGene1 = 1; iGene1 < path.size() - 1; iGene1++) {
+            cout << iGene1 << endl;
       for (int iGene2 = iGene1 + 1; iGene2 < path.size(); iGene2++) {
-
+	//	cout << iGene2 << endl;
 	timestamp_t t0 = get_timestamp();
 	double prevCost = fitness(path, coords, primes, iGene1-1, iGene2+1, iGene1-1);
 	twoOptSwap(path, swappedGenes, iGene1, iGene2);
 	double newCost = fitness(swappedGenes, coords, primes, iGene1-1, iGene2+1, iGene1-1);
 
-	timestamp_t t1 = get_timestamp();
-
-	double secs = (t1 - t0) / 1000000.0L;
-
-	cout << "found in " << secs << " seconds" << endl;
-
-	cout << prevCost << endl;
-	cout << newCost << endl;
-
-	exit(0);
-
 	
-	if (swappedGenesFitness < _fitness) {
-	  path.swap(swappedGenes);
-	  _fitness = swappedGenesFitness;
+	if (newCost < prevCost) {
+	  std::cout << std::fixed << std::setprecision(2);
+	  cout << "Cost on portion (old) " << prevCost << endl;
+	  cout << "Cost on portion (new) " << newCost << endl;
+
+	   path.swap(swappedGenes);
+	   cout << "Old overall fitness " << _fitness << endl ;
+	  _fitness = fitness(path, coords, primes);
+	    prevCost = newCost;
 	  hasImproved = true;
-	  cout << _fitness << endl;
+	  cout << "New overall fitness " << _fitness << endl << endl;
 	}
 	else { hasImproved = false; }
+
+      }
+
       }
   }
   
