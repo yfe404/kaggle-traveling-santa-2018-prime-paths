@@ -19,11 +19,10 @@ read_path(cities::Vector{City}, fp::AbstractString) = map(x -> cities[parse(Int,
 
 @views random_path(cities::Vector{City}) = vcat(cities[1], shuffle(cities[2:end]), cities[1])
 
-function score(path::Vector{City})
-    @assert path[1].i == path[end].i == 0
+function score(path::Vector{City}; start=1)
     dist = 0.0
     @inbounds for i in 1:length(path)-1
-        if (i % 10 == 0) && !path[i].p
+        if ((i+(start-1)) % 10 == 0) && !path[i].p
             dist += distance(path[i], path[i+1])*1.1
         else
             dist += distance(path[i], path[i+1])
