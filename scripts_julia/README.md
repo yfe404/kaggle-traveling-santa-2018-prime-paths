@@ -8,15 +8,21 @@ julia -e 'import Pkg; Pkg.activate("."); Pkg.instantiate()'
 ### K-NN opt
 
 ```bash
-julia -O3 knn_opt.jl ../input/cities.csv kaggle_submission_file.csv
-# Will output to sub_knn_opt_$score.csv
+julia knn_opt.jl -h
+# usage: knn_opt.jl --cities FILE --path FILE --knn K [-h]
+
+# optional arguments:
+#   --cities FILE  path to kaggle cities.csv file
+#   --path FILE    path to the file containing the solution to optimize,
+#                  in kaggle .csv submission format
+#   --knn K        number of nearest neighbors to consider in the 2-opt
+#                  (type: Int64)
+#   -h, --help     show this help message and exit
 ```
 
-Config
-```julia
-# Edit the end of knn_opt.jl
-path = nn_opt(path, collect(10:10:length(path)-1), 100); println()                                                                                           
-path = nn_opt(path, collect(2:length(path)-1), 25); println()   
+```bash
+julia -O3 knn_opt.jl --cities ../input/cities.csv --path outputs/sub_knn_opt_1.516828660813334e6.csv --knn 100
+# Will output to sub_knn_opt_$score.csv
 ```
 
 ### Parallel K-NN opt
