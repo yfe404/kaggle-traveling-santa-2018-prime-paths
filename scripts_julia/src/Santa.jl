@@ -15,6 +15,8 @@ export
     read_path,
     score,
     verify!,
+    Chunk,
+    is_penalized,
     # tsplib.jl
     from_tsplib,
     to_tsplib,

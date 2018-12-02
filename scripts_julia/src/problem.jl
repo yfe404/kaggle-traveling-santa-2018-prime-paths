@@ -35,3 +35,12 @@ function verify!(path::Vector{City})
     @assert path[1].i == path[end].i == 0
     @assert length(unique(path)) == 197769
 end
+
+struct Chunk
+    path::Vector{City}
+    offset::Int
+end
+
+is_penalized(chunk::Chunk, i::Int) = !chunk.path[i].p && ((i+chunk.offset-1) % 10 == 0)
+
+score(chunk::Chunk) = score(chunk.path, start=chunk.offset)

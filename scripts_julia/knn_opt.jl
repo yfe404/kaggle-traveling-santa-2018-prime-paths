@@ -6,17 +6,6 @@ import Pkg; Pkg.activate(".")
 using ArgParse
 using Santa
 
-# TODO: Move this to src/
-# -----------------------
-struct Chunk
-    path::Vector{City}
-    offset::Int
-end
-
-is_penalized(chunk::Chunk, i::Int) = !chunk.path[i].p && ((i+chunk.offset-1) % 10 == 0)
-Santa.score(chunk::Chunk) = score(chunk.path, start=chunk.offset)
-# -----------------------
-
 # Score the swapping reversal of the path from k (inclusive) to l (inclusive)
 # The lower the better
 function score_2opt(chunk::Chunk, k::Int, l::Int)
