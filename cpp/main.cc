@@ -297,6 +297,68 @@ void evaluatePopulation(vector<Genome>& population, const vector<pair<double,dou
   cout << "Worst individual: " << population[0].get_fitness() << endl; 
 }
 
+// @todo: replace with mte
+double randMToN(double M, double N)
+{
+    return M + (rand() / ( RAND_MAX / (N-M) ) ) ;  
+}
+
+void mutate(Genome& genome) {
+
+  int size = genome.get_phenotype().size();
+  
+  int i = randMToN(1, (int)(0.25*size));
+  int ii = i + 1;
+
+  int j = randMToN(ii+1, (int)(0.50*size));
+  int jj = j + 1;
+
+  int k = randMToN(jj+1, (int)(0.75*size));
+  int kk = k + 1;
+
+  int l = randMToN(kk+1, size-2);
+  int ll = l + 1;
+
+  cout << i << " " << ii <<  " " << j << " " << jj << " " <<  k << " " << kk << " " << l << " " << ll << endl;
+
+  vector<int> phenotype(size);
+
+  cout << "WTF"  << endl;
+
+
+  std::copy(begin(genome.get_phenotype()), begin(genome.get_phenotype())+i, phenotype.begin());
+
+    cout << "WTF"  << endl;
+  phenotype.push_back(genome.get_phenotype()[kk]);
+  
+  std::copy(begin(genome.get_phenotype())+kk+1, begin(genome.get_phenotype())+l,
+            end(phenotype));
+
+  phenotype.push_back(genome.get_phenotype()[jj]);
+
+  std::copy(begin(genome.get_phenotype())+jj+1, begin(genome.get_phenotype())+k,
+            end(phenotype));
+
+  phenotype.push_back(genome.get_phenotype()[ii]);
+
+  std::copy(begin(genome.get_phenotype())+ii+1, begin(genome.get_phenotype())+j,
+            end(phenotype));
+  
+  phenotype.push_back(genome.get_phenotype()[ll]);
+
+  std::copy(begin(genome.get_phenotype())+ll+1, end(genome.get_phenotype()),
+            end(phenotype));
+
+  /*
+  for (int i = 0; i < size; ++i) {
+      cout << phenotype[i] << endl;
+  }
+  */
+  genome.set_phenotype(phenotype);
+
+ }
+
+
 
 int main() {
 
@@ -314,6 +376,10 @@ int main() {
   cout << "Initializing population....." << endl ;
   evaluatePopulation(population, coords, primes);
 
+  mutate(population[0]);
+
+  evaluatePopulation(population, coords, primes);
+    
   cout << "-._    _.--'\"`'--._    _.--'\"`'--._    _.--'\"`'--._    _" << endl;
   cout << "'-:`.'|`|\"':-.  '-:`.'|`|\"':-.  '-:`.'|`|\"':-.  '.` : '.   " << endl;
   cout << "  '.  '.  | |  | |'.  '.  | |  | |'.  '.  | |  | |'.  '.:   '.  '." << endl;
