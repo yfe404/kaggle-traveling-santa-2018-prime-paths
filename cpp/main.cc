@@ -14,6 +14,7 @@
 #include <dirent.h>
 #include <sys/types.h>
 #include <random>
+#include <numeric>
 
 #include "genome.h"
 
@@ -457,7 +458,39 @@ Genome mutate(Genome& genome) {
 
   return Genome(phenotype);
 
- }
+}
+
+
+template <typename T>
+vector<size_t> sort_indexes(const vector<T> &v) {
+
+  // initialize original index locations
+  vector<size_t> idx(v.size());
+  iota(idx.begin(), idx.end(), 0);
+
+  // sort indexes based on comparing values in v
+  sort(idx.begin(), idx.end(),
+       [&v](size_t i1, size_t i2) {return v[i1] < v[i2];});
+
+  return idx;
+}
+
+vector<unsigned long> getNN(int cityID, const vector<pair<double,double > > &coords, int n=20) {
+
+  vector<double> distances;
+
+  for(int i = 1; i < coords.size(); ++i){
+    if (i == cityID){continue;}
+    double edgeDistance = sqrt(pow((coords[cityID].first - coords[i].first), 2) + 
+		      pow((coords[cityID].second - coords[i].second), 2));
+    distances.push_back(edgeDistance);
+  }
+
+  auto dd = sort_indexes(distances);
+  return slice(dd, 0, n-1);
+
+}
+
 
 void run2kopt(Genome& genome, const vector<pair<double,double > > &coords, const vector<int>& primes) {
   
@@ -473,9 +506,11 @@ void run2kopt(Genome& genome, const vector<pair<double,double > > &coords, const
 
   int k = 0;
   while (hasImproved) {
-    for (int iGene1 = 1; iGene1 < path.size() - 1; iGene1++) {
-      for (int iGene2 = iGene1 + 1; iGene2 < path.size(); iGene2++) {
-	if ((iGene2 > iGene1 + 20)) continue;
+    for (int iGene1 = 1; iGene1 < path.size() - 1; ++iGene1) {
+      auto nearests = getNN(iGene1, coords, 30);
+      for (int i = 0; i < 30; i++) {
+	int iGene2 = nearests[i];
+	if ((iGene2 <= iGene1)) continue;
 	timestamp_t t0 = get_timestamp();
 	double prevCost = fitness(path, coords, primes, iGene1-1, iGene2+1);
 	twoOptSwap(path, swappedGenes, iGene1, iGene2);
@@ -497,7 +532,7 @@ void run2kopt(Genome& genome, const vector<pair<double,double > > &coords, const
 
       }
 
-      }
+    }
   }
 
   genome.set_phenotype(path);
