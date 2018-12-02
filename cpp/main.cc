@@ -382,7 +382,7 @@ Genome crossover(const Genome &parent1, const Genome &parent2) {
 }
 
 
-void mutate(Genome& genome) {
+Genome mutate(Genome& genome) {
 
   int size = genome.get_phenotype().size();
   
@@ -455,159 +455,31 @@ void mutate(Genome& genome) {
     );
 
 
-  genome.set_phenotype(phenotype);
+  return Genome(phenotype);
 
  }
 
-
-
-int main() {
-
-  auto population = load_generation();
-  auto coords = read_problem();
-  auto primes = read_primes();
-
-
+void run2kopt(Genome& genome, const vector<pair<double,double > > &coords, const vector<int>& primes) {
   
-  auto path = read_path();
-  list<int> ids;
-  copy( path.begin(), path.end()-1, back_inserter( ids ) );
-
-
-  cout << "Initializing population....." << endl ;
-  evaluatePopulation(population, coords, primes);
-
-  mutate(population[0]);
-  crossover(population[0], population[1]);
-
-  evaluatePopulation(population, coords, primes);
-    
-  cout << "-._    _.--'\"`'--._    _.--'\"`'--._    _.--'\"`'--._    _" << endl;
-  cout << "'-:`.'|`|\"':-.  '-:`.'|`|\"':-.  '-:`.'|`|\"':-.  '.` : '.   " << endl;
-  cout << "  '.  '.  | |  | |'.  '.  | |  | |'.  '.  | |  | |'.  '.:   '.  '." << endl;
-  cout << "  : '.  '.| |  | |  '.  '.| |  | |  '.  '.| |  | |  '.  '.  : '.  `." << endl;
-  cout << "  '   '.  `.:_ | :_.' '.  `.:_ | :_.' '.  `.:_ | :_.' '.  `.'   `." << endl;
-  cout << "         `-..,..-'       `-..,..-'       `-..,..-'       `         `" << endl;
-
-  float MUTRATE = 0.5;
-  int NGEN = 5;
-  int POPSIZE = 100;
-  int SEED = 42;
-
-  mt19937 mte(SEED);  // mt19937 is a standard mersenne_twister_engine
-  
-  cout << "Using Mersenne Twister Engine (Matsumoto and Nishimura)." << endl;
-  cout << "Setting seed to " << SEED << endl;
-  cout << "Mutation rate set to " << MUTRATE << endl;
-  cout << "Number of generations set to " << NGEN << endl;
-  cout << "Population size set to " << POPSIZE << endl;
-  cout << "Using Greedy Subtour Crossover V.2 (GSX-2)" << endl;
-  cout << "Using Double-Bridge Mutation" << endl;
-
-  cout << "-._    _.--'\"`'--._    _.--'\"`'--._    _.--'\"`'--._    _" << endl;
-  cout << "'-:`.'|`|\"':-.  '-:`.'|`|\"':-.  '-:`.'|`|\"':-.  '.` : '.   " << endl;
-  cout << "  '.  '.  | |  | |'.  '.  | |  | |'.  '.  | |  | |'.  '.:   '.  '." << endl;
-  cout << "  : '.  '.| |  | |  '.  '.| |  | |  '.  '.| |  | |  '.  '.  : '.  `." << endl;
-  cout << "  '   '.  `.:_ | :_.' '.  `.:_ | :_.' '.  `.:_ | :_.' '.  `.'   `." << endl;
-  cout << "         `-..,..-'       `-..,..-'       `-..,..-'       `         `" << endl;
-
-  
-  for (int i = 0; i < NGEN; ++i) {
-    cout << "========== GENERATTION " << i << " ==========" << endl;
-    double rnd = (double)mte() / (double)mte.max();
-    if (rnd < MUTRATE) {
-      cout << "Genetic pool initialized for mutation..." << endl;
-      cout << "Selecting parent sequence..." << endl;
-      cout << "Starting mutation..." << endl;
-    } else {
-      cout << "Genetic pool initialized for crossover..." << endl;
-      cout << "Selecting parent sequences for crossover..." << endl;
-      cout << "Starting Crossover..." << endl;
-    }
-
-    cout << "Improvement Heuristic started..." << endl;
-    cout << "Checking improvement of offspring genetic sequence obtained..." << endl;
-    
-  }
-
-  /*
-
-Begin
- For each subpopulation do
-   Initialize subpopulation by tour
-   construction heuristic;
- Repeat {
-   For each subpopulation do {
-If (rand() < mutation rate) {
-Select one parent p using linear ranking; Mutation(p, c);
-    } Else {
-      Select two parents p1, p2 using linear
-      ranking;
-      Crossover(p1, p2, c);
-}
-Tour improvement heuristic(c);
-Replace c to the worst parent if fitter;
-}
-At predefined migration interval do
-    Migration between subpopulations
- }
- Until converged;
-End
-   */
-  /*
-  for (auto iter = generation.begin(); iter != generation.end(); ++iter) {
-    auto genetic_seq = *iter;
-    //    std::cout << fitness (genetic_seq, coords, primes)<< endl;
-  }
-  */
-
-  /*
-  path = construct(ids, coords);
-  float _ffitness = fitness(path, coords, primes);
-  std::cout << std::fixed << std::setprecision(2);
-  cout << "Fitness score of initial genetic sequence: " << _ffitness << endl;
-  */
-  exit(0);
-
-  
-  /*======================================================================================================================================================================================================== LOCAL SEARCH ======================================================================================================================================================================================================== */
-
   float _fitness = 0.0;
   bool hasImproved = true;
   double swappedGenesFitness = 0.0;
-
-  timestamp_t t0 = get_timestamp();
-  _fitness = fitness(path, coords, primes);
-  timestamp_t t1 = get_timestamp();
-
-  double secs = (t1 - t0) / 1000000.0L;
-
-  std::cout << std::fixed << std::setprecision(2);
-  cout << "Fitness score of initial genetic sequence: " << _fitness << endl;
-  cout << "found in " << secs << " seconds" << endl;
+  auto path = vector<int>(genome.get_phenotype());
+  int size = path.size();
   
-  vector<int> swappedGenes(path.size());
+  _fitness = fitness(path, coords, primes);
+
+  vector<int> swappedGenes(size);
 
   int k = 0;
   while (hasImproved) {
     for (int iGene1 = 1; iGene1 < path.size() - 1; iGene1++) {
-      //      cout << iGene1 << endl;
       for (int iGene2 = iGene1 + 1; iGene2 < path.size(); iGene2++) {
-	//	if (((iGene1-1) %10) != 0) continue;
 	if ((iGene2 > iGene1 + 20)) continue;
-	//	cout << iGene2 << endl;
-	//	if ((iGene1 != 21)) continue;
-	//	cout << iGene1 << " " << iGene2 << endl;
 	timestamp_t t0 = get_timestamp();
 	double prevCost = fitness(path, coords, primes, iGene1-1, iGene2+1);
-	//	cout << "BP" << endl;
 	twoOptSwap(path, swappedGenes, iGene1, iGene2);
-	//	cout << "BP" << endl;
-	//	cout << iGene1 << " " << iGene2 << endl;
-	double newCost = fitness(swappedGenes, coords, primes, iGene1-1, iGene2+1); // segfault 
-	//	cout << "BP" << endl;
-
-
+	double newCost = fitness(swappedGenes, coords, primes, iGene1-1, iGene2+1); 
 	
 	if (newCost < prevCost) {
 	  std::cout << std::fixed << std::setprecision(2);
@@ -627,6 +499,91 @@ End
 
       }
   }
+
+  genome.set_phenotype(path);
+}
+
+
+
+int main() {
+
+  auto coords = read_problem();
+  auto primes = read_primes();
+
+  auto path = read_path();
+  list<int> ids;
+  copy( path.begin(), path.end()-1, back_inserter( ids ) );
+
+
+    
+  cout << "-._    _.--'\"`'--._    _.--'\"`'--._    _.--'\"`'--._    _" << endl;
+  cout << "'-:`.'|`|\"':-.  '-:`.'|`|\"':-.  '-:`.'|`|\"':-.  '.` : '.   " << endl;
+  cout << "  '.  '.  | |  | |'.  '.  | |  | |'.  '.  | |  | |'.  '.:   '.  '." << endl;
+  cout << "  : '.  '.| |  | |  '.  '.| |  | |  '.  '.| |  | |  '.  '.  : '.  `." << endl;
+  cout << "  '   '.  `.:_ | :_.' '.  `.:_ | :_.' '.  `.:_ | :_.' '.  `.'   `." << endl;
+  cout << "         `-..,..-'       `-..,..-'       `-..,..-'       `         `" << endl;
+
+  float MUTRATE = 0.9;
+  int NGEN = 1000;
+  int POPSIZE = 20;
+  int SEED = 42;
+
+  mt19937 mte(SEED);  // mt19937 is a standard mersenne_twister_engine
   
-  return 0;
+  cout << "Using Mersenne Twister Engine (Matsumoto and Nishimura)." << endl;
+  cout << "Setting seed to " << SEED << endl;
+  cout << "Mutation rate set to " << MUTRATE << endl;
+  cout << "Number of generations set to " << NGEN << endl;
+  cout << "Population size set to " << POPSIZE << endl;
+  cout << "Using Greedy Subtour Crossover V.2 (GSX-2)" << endl;
+  cout << "Using Double-Bridge Mutation" << endl;
+
+  cout << "-._    _.--'\"`'--._    _.--'\"`'--._    _.--'\"`'--._    _" << endl;
+  cout << "'-:`.'|`|\"':-.  '-:`.'|`|\"':-.  '-:`.'|`|\"':-.  '.` : '.   " << endl;
+  cout << "  '.  '.  | |  | |'.  '.  | |  | |'.  '.  | |  | |'.  '.:   '.  '." << endl;
+  cout << "  : '.  '.| |  | |  '.  '.| |  | |  '.  '.| |  | |  '.  '.  : '.  `." << endl;
+  cout << "  '   '.  `.:_ | :_.' '.  `.:_ | :_.' '.  `.:_ | :_.' '.  `.'   `." << endl;
+  cout << "         `-..,..-'       `-..,..-'       `-..,..-'       `         `" << endl;
+
+  cout << "Initializing population....." << endl ;
+  auto population = load_generation();
+
+  evaluatePopulation(population, coords, primes);
+
+  mutate(population[0]);
+  crossover(population[0], population[1]);
+
+  evaluatePopulation(population, coords, primes);
+  
+  
+  for (int i = 0; i < NGEN; ++i) {
+    Genome child;
+    
+    cout << "========== GENERATTION " << i << " ==========" << endl;
+    double rnd = (double)mte() / (double)mte.max();
+    if (rnd < MUTRATE) {
+      cout << "Genetic pool initialized for mutation..." << endl;
+      cout << "Selecting parent sequence..." << endl;
+      cout << "Starting mutation..." << endl;
+      child = mutate(population[POPSIZE-1]);
+    } else {
+      cout << "Genetic pool initialized for crossover..." << endl;
+      cout << "Selecting parent sequences for crossover..." << endl;
+      cout << "Starting Crossover..." << endl;
+      child = crossover(population[POPSIZE-1], population[POPSIZE-2]);
+    }
+
+    cout << "Improvement Heuristic started..." << endl;
+
+    run2kopt(child, coords, primes);
+    
+    cout << "Checking improvement of offspring genetic sequence obtained..." << endl;
+    if ( population[0] < child) {
+      population[0] = child;
+    }
+
+    evaluatePopulation(population, coords, primes);
+    
+  }
+
 }
