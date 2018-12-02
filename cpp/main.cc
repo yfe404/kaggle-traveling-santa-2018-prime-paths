@@ -15,8 +15,24 @@
 #include <sys/types.h>
 #include <random>
 
+#include "genome.h"
+
 using namespace std;
 
+
+
+template<class BidiIter >
+BidiIter random_unique(BidiIter begin, BidiIter end, size_t num_random) {
+    size_t left = std::distance(begin, end);
+    while (num_random--) {
+        BidiIter r = begin;
+        std::advance(r, rand()%left);
+        std::swap(*begin, *r);
+        ++begin;
+        --left;
+    }
+    return begin;
+}
 
 vector<string> list_dir(const char *path) {
   vector<string> files;
@@ -181,18 +197,18 @@ vector<int> read_path(string filename="path.tsp") {
   return path;
 }
 
-vector<vector<int> > load_generation(int popSize=20) {
-  vector<vector<int> > generation;
+vector<Genome> load_generation(int popSize=20) {
+  vector<Genome> generation;
   cout << "Loading " << popSize << " genetic sequences........." << endl;
 
   auto files = list_dir("./genetic_pool");
+  random_unique(files.begin(), files.end(), popSize);
 
-  for (auto iter = files.begin(); iter != files.end(); ++iter) {
-    auto genetic_seq = read_path(string("./genetic_pool/") + *iter);
-    generation.push_back(genetic_seq);
-    //std::cout << *iter << endl;
+  for(int i=0; i<popSize; ++i) {
+    auto genetic_seq = read_path(string("./genetic_pool/") + files[i]);
+    generation.push_back(Genome(genetic_seq));
   }
-  
+
   return generation;
 }
 
@@ -274,7 +290,7 @@ float fitness(const vector<int>& path, const vector<pair<double,double > > &coor
 int main() {
 
   auto generation = load_generation();
- 
+
   auto path = read_path();
   auto coords = read_problem();
   auto primes = read_primes();
