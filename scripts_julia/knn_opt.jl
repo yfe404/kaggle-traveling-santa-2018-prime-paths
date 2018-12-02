@@ -42,7 +42,7 @@ function score_2opt(chunk::Chunk, k::Int, l::Int)
     
     penalties_diff = 0.0
     
-    start = (k%10 == 0)*k
+    start = ((k+chunk.offset-1) % 10 == 0)*k
     if start == 0
         start = k+10-(k+chunk.offset-1) % 10
     end
@@ -101,6 +101,9 @@ function parse_commandline()
             help = "number of nearest neighbors to consider in the 2-opt"
             required = true
             arg_type = Int
+        "--loop"
+            action = :store_true
+            help = "loop until no further improvement are made"
     end
 
     return parse_args(s)
@@ -116,10 +119,22 @@ function main()
     println("Original score: $(score(path))")
 
     chunk = Chunk(path, 1)
-    new_chunk = nn_opt(chunk, parsed_args["knn"])
+    last_score = score(chunk)
 
-    out = vcat("Path", map(c -> c.i, new_chunk.path))
-    write("sub_knn_opt_$(score(new_chunk.path)).csv", join(out, "\n"))
+    while true
+        chunk = nn_opt(chunk, parsed_args["knn"])
+        new_score = score(chunk)
+        println("")
+
+        if (new_score < last_score) && parsed_args["loop"]
+            last_score = new_score
+        else
+            break
+        end
+    end
+
+    out = vcat("Path", map(c -> c.i, chunk.path))
+    write("sub_knn_opt_$(score(chunk.path)).csv", join(out, "\n"))
 end
 
 main()
