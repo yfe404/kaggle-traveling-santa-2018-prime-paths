@@ -269,27 +269,17 @@ void twoOptSwap(
 
 
 float fitness(const vector<int>& path, const vector<pair<double,double > > &coords, const vector<int>& primes, int start=0, int end=197769) {
-
-  //  int currentIndex = 0;
   double distance = 0;
   int size = path.size();
 
-  //  cout << size << " " << start << " " <<  end <<  endl;
-  
   for (int i = start+1; i < size; ++i) {
-    float edgeDistance = 0.0;
-    //    cout << i << endl;
-    edgeDistance = sqrt(pow((coords[path[i-1]].first - coords[path[i]].first), 2) + 
+    if ((i % 10 == 0) && !primes[path[i-1]]) {
+      distance += sqrt(pow((coords[path[i-1]].first - coords[path[i]].first), 2) + 
+		      pow((coords[path[i-1]].second - coords[path[i]].second), 2)) * 1.1;
+    } else {
+      distance += sqrt(pow((coords[path[i-1]].first - coords[path[i]].first), 2) + 
 		      pow((coords[path[i-1]].second - coords[path[i]].second), 2));
-    //    cout << "BT1" << endl;
-
-    //    cout << i+step-1 << endl;
-    if ((((i)%10) == 0) && (!primes[path[i-1]])) {
-      edgeDistance *= 1.1;
     }
-
-    //    cout << "BT2" << endl;
-    distance += edgeDistance;
   }
     
     return distance;
@@ -475,51 +465,20 @@ vector<size_t> sort_indexes(const vector<T> &v) {
   return idx;
 }
 
-
-// vector<unsigned long> getNN_old(int cityID, const vector<pair<double,double > > &coords, int n=20) {
-
-//   vector<double> distances;
-
-//   for(int i = 1; i < coords.size(); ++i){
-//     if (i == cityID){continue;}
-//     double edgeDistance = sqrt(pow((coords[cityID].first - coords[i].first), 2) + 
-// 		      pow((coords[cityID].second - coords[i].second), 2));
-//     distances.push_back(edgeDistance);
-//   }
-
-//   auto dd = sort_indexes(distances);
-//   return slice(dd, 0, n-1);
-
-// }
-
-
-// Get the n neareast neighbors of cityID but does not return them sorted !
 vector<unsigned long> getNN(int cityID, const vector<pair<double,double > > &coords, int n=20) {
-  n = min(n, (int)coords.size());
 
-  vector<pair<double, int>> distances = {make_pair(numeric_limits<double>::max(), 0)};
-  make_heap(distances.begin(), distances.end());
+  vector<double> distances;
 
-  for(int i = 1; i < coords.size(); ++i) {
-    if (i == cityID) { continue; }
-
+  for(int i = 1; i < coords.size(); ++i){
+    if (i == cityID){continue;}
     double edgeDistance = sqrt(pow((coords[cityID].first - coords[i].first), 2) + 
 		      pow((coords[cityID].second - coords[i].second), 2));
-
-      if (edgeDistance < distances.front().first) {
-        distances.push_back({edgeDistance, i});
-        push_heap(distances.begin(), distances.end());
-        if (distances.size() > n) {
-          pop_heap(distances.begin(), distances.end());
-          distances.pop_back();
-        }
-      }
+    distances.push_back(edgeDistance);
   }
 
-  // Cleaner way to extract second member ?
-  vector<unsigned long> dd;
-  std::for_each(distances.begin(), distances.end(), [&dd](pair<double, int> &p){ dd.push_back(p.second); });
-  return dd;
+  auto dd = sort_indexes(distances);
+  return slice(dd, 0, n-1);
+
 }
 
 
@@ -539,7 +498,7 @@ void run2kopt(Genome& genome, const vector<pair<double,double > > &coords, const
   while (hasImproved) {
     for (int iGene1 = 1; iGene1 < path.size() - 1; ++iGene1) {
       auto nearests = getNN(iGene1, coords, 30);
-      for (int i = 0; i < nearests.size(); i++) {
+      for (int i = 0; i < 30; i++) {
 	int iGene2 = nearests[i];
 	if ((iGene2 <= iGene1)) continue;
 	timestamp_t t0 = get_timestamp();
