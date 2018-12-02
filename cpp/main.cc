@@ -291,8 +291,8 @@ int main() {
   cout << "  '   '.  `.:_ | :_.' '.  `.:_ | :_.' '.  `.:_ | :_.' '.  `.'   `." << endl;
   cout << "         `-..,..-'       `-..,..-'       `-..,..-'       `         `" << endl;
 
-  float MUTRATE = 0.1;
-  int NGEN = 1000;
+  float MUTRATE = 0.5;
+  int NGEN = 5;
   int POPSIZE = 100;
   int SEED = 42;
 
@@ -306,10 +306,30 @@ int main() {
   cout << "Using Greedy Subtour Crossover V.2 (GSX-2)" << endl;
   cout << "Using Double-Bridge Mutation" << endl;
 
+  cout << "-._    _.--'\"`'--._    _.--'\"`'--._    _.--'\"`'--._    _" << endl;
+  cout << "'-:`.'|`|\"':-.  '-:`.'|`|\"':-.  '-:`.'|`|\"':-.  '.` : '.   " << endl;
+  cout << "  '.  '.  | |  | |'.  '.  | |  | |'.  '.  | |  | |'.  '.:   '.  '." << endl;
+  cout << "  : '.  '.| |  | |  '.  '.| |  | |  '.  '.| |  | |  '.  '.  : '.  `." << endl;
+  cout << "  '   '.  `.:_ | :_.' '.  `.:_ | :_.' '.  `.:_ | :_.' '.  `.'   `." << endl;
+  cout << "         `-..,..-'       `-..,..-'       `-..,..-'       `         `" << endl;
+
   
-  for (int i = 0; i < 100; ++i) {
+  for (int i = 0; i < NGEN; ++i) {
+    cout << "========== GENERATTION " << i << " ==========" << endl;
     double rnd = (double)mte() / (double)mte.max();
-    cout << rnd << endl;
+    if (rnd < MUTRATE) {
+      cout << "Genetic pool initialized for mutation..." << endl;
+      cout << "Selecting parent sequence..." << endl;
+      cout << "Starting mutation..." << endl;
+    } else {
+      cout << "Genetic pool initialized for crossover..." << endl;
+      cout << "Selecting parent sequences for crossover..." << endl;
+      cout << "Starting Crossover..." << endl;
+    }
+
+    cout << "Improvement Heuristic started..." << endl;
+    cout << "Checking improvement of offspring genetic sequence obtained..." << endl;
+    
   }
 
   /*
