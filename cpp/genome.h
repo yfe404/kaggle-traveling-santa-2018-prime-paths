@@ -15,12 +15,15 @@ using std::vector;
 class Genome {
  public:
   Genome(vector<int> phenotype);
-  vector<int> get_phenotype();
+  const vector<int>& get_phenotype() {return this->phenotype;};
 
   bool operator < (const Genome& otherGenome) const
   {
     return (this->fitness > otherGenome.fitness);
   }
+
+  long get_fitness() { return this->fitness; };
+  void set_fitness(long fitness) { this->fitness = fitness;}; 
   
  private:
   vector<int> phenotype; 

@@ -286,19 +286,33 @@ float fitness(const vector<int>& path, const vector<pair<double,double > > &coor
 }
 
 
+void evaluatePopulation(vector<Genome>& population, const vector<pair<double,double > > &coords, const vector<int>& primes){
+  for (auto iter = population.begin(); iter != population.end(); ++iter) {
+    iter->set_fitness(fitness(iter->get_phenotype(), coords, primes ));
+  }
+
+  std::sort(population.begin(), population.end());
+
+  cout << "Best individual: " << population[population.size()-1].get_fitness() << endl;
+  cout << "Worst individual: " << population[0].get_fitness() << endl; 
+}
+
 
 int main() {
 
-  auto generation = load_generation();
-
-  auto path = read_path();
+  auto population = load_generation();
   auto coords = read_problem();
   auto primes = read_primes();
+
+
+  
+  auto path = read_path();
   list<int> ids;
   copy( path.begin(), path.end()-1, back_inserter( ids ) );
 
 
   cout << "Initializing population....." << endl ;
+  evaluatePopulation(population, coords, primes);
 
   cout << "-._    _.--'\"`'--._    _.--'\"`'--._    _.--'\"`'--._    _" << endl;
   cout << "'-:`.'|`|\"':-.  '-:`.'|`|\"':-.  '-:`.'|`|\"':-.  '.` : '.   " << endl;
@@ -372,12 +386,12 @@ At predefined migration interval do
  Until converged;
 End
    */
-
+  /*
   for (auto iter = generation.begin(); iter != generation.end(); ++iter) {
     auto genetic_seq = *iter;
     //    std::cout << fitness (genetic_seq, coords, primes)<< endl;
   }
-
+  */
 
   /*
   path = construct(ids, coords);
