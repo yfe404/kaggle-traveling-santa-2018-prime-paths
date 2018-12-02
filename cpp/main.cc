@@ -267,34 +267,22 @@ void twoOptSwap(
     }
 }
 
-
 float fitness(const vector<int>& path, const vector<pair<double,double > > &coords, const vector<int>& primes, int start=0, int end=197769) {
-
-  //  int currentIndex = 0;
   double distance = 0;
   int size = path.size();
 
-  //  cout << size << " " << start << " " <<  end <<  endl;
-  
   for (int i = start+1; i < size; ++i) {
-    float edgeDistance = 0.0;
-    //    cout << i << endl;
-    edgeDistance = sqrt(pow((coords[path[i-1]].first - coords[path[i]].first), 2) + 
+    if ((i % 10 == 0) && !primes[path[i-1]]) {
+      distance += sqrt(pow((coords[path[i-1]].first - coords[path[i]].first), 2) + 
+		      pow((coords[path[i-1]].second - coords[path[i]].second), 2)) * 1.1;
+    } else {
+      distance += sqrt(pow((coords[path[i-1]].first - coords[path[i]].first), 2) + 
 		      pow((coords[path[i-1]].second - coords[path[i]].second), 2));
-    //    cout << "BT1" << endl;
-
-    //    cout << i+step-1 << endl;
-    if ((((i)%10) == 0) && (!primes[path[i-1]])) {
-      edgeDistance *= 1.1;
     }
-
-    //    cout << "BT2" << endl;
-    distance += edgeDistance;
   }
     
     return distance;
 }
-
 
 
 template<typename T>
