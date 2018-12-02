@@ -267,7 +267,6 @@ void twoOptSwap(
     }
 }
 
-
 float fitness(const vector<int>& path, const vector<pair<double,double > > &coords, const vector<int>& primes, int start=0, int end=197769) {
   double distance = 0;
   int size = path.size();
@@ -284,7 +283,6 @@ float fitness(const vector<int>& path, const vector<pair<double,double > > &coor
     
     return distance;
 }
-
 
 
 template<typename T>
