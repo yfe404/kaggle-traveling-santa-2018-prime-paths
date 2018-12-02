@@ -25,6 +25,12 @@ generating solutions used as input in other algorithms such as local search.
 ** Some Snippets (DO NOT USE - just for backup)
 
 
+#+BEGIN_SRC sh
+cat solution_in_kaggle_format.csv  | tail -n 197770 | tr "\n" " "  > path.tsp
+cp path.tsp cpp/genetic_pool 
+#+END_SRC
+
+
 #+BEGIN_SRC python
 import sys
 import numpy as np
