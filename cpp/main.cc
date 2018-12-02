@@ -295,6 +295,18 @@ float fitness(const vector<int>& path, const vector<pair<double,double > > &coor
 }
 
 
+
+template<typename T>
+bool is_in(vector<T> const &v, T val) {
+
+    auto it = find (v.begin(), v.end(), val);
+  
+    if (it != v.end())
+        return true;
+ 
+    return false;
+}
+
 void evaluatePopulation(vector<Genome>& population, const vector<pair<double,double > > &coords, const vector<int>& primes){
   for (auto iter = population.begin(); iter != population.end(); ++iter) {
     iter->set_fitness(fitness(iter->get_phenotype(), coords, primes ));
@@ -311,6 +323,64 @@ double randMToN(double M, double N)
 {
     return M + (rand() / ( RAND_MAX / (N-M) ) ) ;  
 }
+
+Genome crossover(const Genome &parent1, const Genome &parent2) {
+    
+    vector<int> child;
+    vector<int> city_included;
+    int size = parent1.get_phenotype().size();
+    bool STOP = false;
+    
+    int rnd_city = randMToN(1, size);
+    
+    child.push_back(rnd_city);
+    
+    auto it = find(parent1.get_phenotype().begin(), parent1.get_phenotype().end(), rnd_city);
+    int rnd_city_in_parent1 = it - parent1.get_phenotype().begin();
+    
+    it = find(parent2.get_phenotype().begin(), parent2.get_phenotype().end(), rnd_city);
+    int rnd_city_in_parent2 = it - parent2.get_phenotype().begin();
+    
+    city_included.push_back(rnd_city);
+    
+    int idx1 = rnd_city_in_parent1 + 1;
+    int idx2 = rnd_city_in_parent2 - 1;
+    
+    while(!STOP) {
+        if (idx1 < size-1) { // -1 for the 0 
+            if(is_in(city_included, parent1.get_phenotype()[idx1])) {
+                STOP = true;
+                break;
+            }
+            child.insert(child.begin(), parent1.get_phenotype()[idx1]);
+            city_included.push_back(parent1.get_phenotype()[idx1]);
+            idx1++;
+        } else {break;}
+
+        if(idx2 > 0) { // > strict for the 0 
+            if(is_in(city_included, parent2.get_phenotype()[idx2])) {
+                STOP = true;
+                break;
+            }
+            child.insert(child.begin(), parent2.get_phenotype()[idx2]);
+            city_included.push_back(parent2.get_phenotype()[idx2]);
+            idx2--;
+        }
+    }
+    
+    for(int i = 1; i < size-1; ++i) { // -1 for the zero
+        if (!is_in(city_included, parent2.get_phenotype()[i])) {
+            child.push_back(parent2.get_phenotype()[i]);
+        }
+    }
+        
+    child.push_back(0);
+    child.insert(child.begin(), 0);
+    
+    return Genome(child);
+
+}
+
 
 void mutate(Genome& genome) {
 
@@ -408,6 +478,7 @@ int main() {
   evaluatePopulation(population, coords, primes);
 
   mutate(population[0]);
+  crossover(population[0], population[1]);
 
   evaluatePopulation(population, coords, primes);
     

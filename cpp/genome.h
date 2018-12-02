@@ -15,7 +15,7 @@ using std::vector;
 class Genome {
  public:
   Genome(vector<int> phenotype);
-  const vector<int>& get_phenotype() {return this->phenotype;};
+  vector<int>  get_phenotype() const  {return phenotype;};
   void set_phenotype(vector<int> phenotype) {this->phenotype = phenotype;}; 
 
   bool operator < (const Genome& otherGenome) const
