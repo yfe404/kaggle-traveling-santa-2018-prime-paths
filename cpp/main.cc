@@ -19,6 +19,15 @@
 
 using namespace std;
 
+template<typename T>
+std::vector<T> slice(std::vector<T> const &v, int m, int n)
+{
+    auto first = v.cbegin() + m;
+    auto last = v.cbegin() + n + 1;
+
+    std::vector<T> vec(first, last);
+    return vec;
+}
 
 
 template<class BidiIter >
@@ -321,39 +330,61 @@ void mutate(Genome& genome) {
 
   cout << i << " " << ii <<  " " << j << " " << jj << " " <<  k << " " << kk << " " << l << " " << ll << endl;
 
-  vector<int> phenotype(size);
+  vector<int> phenotype;
 
   cout << "WTF"  << endl;
 
+  std::vector<int> sub_vec1 = slice(genome.get_phenotype(), 0, i);
 
-  std::copy(begin(genome.get_phenotype()), begin(genome.get_phenotype())+i, phenotype.begin());
+  phenotype.insert(
+      phenotype.end(),
+      std::make_move_iterator(sub_vec1.begin()),
+      std::make_move_iterator(sub_vec1.end())
+    );
 
-    cout << "WTF"  << endl;
   phenotype.push_back(genome.get_phenotype()[kk]);
-  
-  std::copy(begin(genome.get_phenotype())+kk+1, begin(genome.get_phenotype())+l,
-            end(phenotype));
+
+
+  std::vector<int> sub_vec2 = slice(genome.get_phenotype(), kk+1, l);
+
+  phenotype.insert(
+      phenotype.end(),
+      std::make_move_iterator(sub_vec2.begin()),
+      std::make_move_iterator(sub_vec2.end())
+    );
 
   phenotype.push_back(genome.get_phenotype()[jj]);
 
-  std::copy(begin(genome.get_phenotype())+jj+1, begin(genome.get_phenotype())+k,
-            end(phenotype));
+  std::vector<int> sub_vec3 = slice(genome.get_phenotype(), jj+1, k);
+
+  phenotype.insert(
+      phenotype.end(),
+      std::make_move_iterator(sub_vec3.begin()),
+      std::make_move_iterator(sub_vec3.end())
+    );
 
   phenotype.push_back(genome.get_phenotype()[ii]);
 
-  std::copy(begin(genome.get_phenotype())+ii+1, begin(genome.get_phenotype())+j,
-            end(phenotype));
-  
+
+    std::vector<int> sub_vec4 = slice(genome.get_phenotype(), ii+1, j);
+
+  phenotype.insert(
+      phenotype.end(),
+      std::make_move_iterator(sub_vec4.begin()),
+      std::make_move_iterator(sub_vec4.end())
+    );
+
   phenotype.push_back(genome.get_phenotype()[ll]);
 
-  std::copy(begin(genome.get_phenotype())+ll+1, end(genome.get_phenotype()),
-            end(phenotype));
+  std::vector<int> sub_vec5 = slice(genome.get_phenotype(), ll+1, size-1);
 
-  /*
-  for (int i = 0; i < size; ++i) {
-      cout << phenotype[i] << endl;
-  }
-  */
+  phenotype.insert(
+      phenotype.end(),
+      std::make_move_iterator(sub_vec5.begin()),
+      std::make_move_iterator(sub_vec5.end())
+    );
+
+
   genome.set_phenotype(phenotype);
 
  }
