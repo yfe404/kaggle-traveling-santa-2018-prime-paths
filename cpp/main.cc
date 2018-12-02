@@ -10,13 +10,12 @@
 #include <sstream>
 #include <sys/time.h>
 #include <cmath>
-
-using namespace std;
-
-
-
+#include <cstdlib>
 #include <dirent.h>
 #include <sys/types.h>
+#include <random>
+
+using namespace std;
 
 
 vector<string> list_dir(const char *path) {
@@ -292,12 +291,52 @@ int main() {
   cout << "  '   '.  `.:_ | :_.' '.  `.:_ | :_.' '.  `.:_ | :_.' '.  `.'   `." << endl;
   cout << "         `-..,..-'       `-..,..-'       `-..,..-'       `         `" << endl;
 
+  float MUTRATE = 0.1;
+  int NGEN = 1000;
+  int POPSIZE = 100;
+  int SEED = 42;
+
+  mt19937 mte(SEED);  // mt19937 is a standard mersenne_twister_engine
+  
+  cout << "Using Mersenne Twister Engine (Matsumoto and Nishimura)." << endl;
+  cout << "Setting seed to " << SEED << endl;
+  cout << "Mutation rate set to " << MUTRATE << endl;
+  cout << "Number of generations set to " << NGEN << endl;
+  cout << "Population size set to " << POPSIZE << endl;
+  cout << "Using Greedy Subtour Crossover V.2 (GSX-2)" << endl;
+  cout << "Using Double-Bridge Mutation" << endl;
+
+  
+  for (int i = 0; i < 100; ++i) {
+    double rnd = (double)mte() / (double)mte.max();
+    cout << rnd << endl;
+  }
+
   /*
-  cout << '. ,-"-.   ,-"-. ,-"-.   ,-"-. ,-"-.   ,';
-  cout << ' X | | \ / | | X | | \ / | | X | | \ /';
-  cout << '/ \| | |X| | |/ \| | |X| | |/ \| | |X|';
-  cout << "`-!-' `-!-\"   `-!-' `-!-'   `-!-' `-";
-    */
+
+Begin
+ For each subpopulation do
+   Initialize subpopulation by tour
+   construction heuristic;
+ Repeat {
+   For each subpopulation do {
+If (rand() < mutation rate) {
+Select one parent p using linear ranking; Mutation(p, c);
+    } Else {
+      Select two parents p1, p2 using linear
+      ranking;
+      Crossover(p1, p2, c);
+}
+Tour improvement heuristic(c);
+Replace c to the worst parent if fitter;
+}
+At predefined migration interval do
+    Migration between subpopulations
+ }
+ Until converged;
+End
+   */
+
   for (auto iter = generation.begin(); iter != generation.end(); ++iter) {
     auto genetic_seq = *iter;
     //    std::cout << fitness (genetic_seq, coords, primes)<< endl;
