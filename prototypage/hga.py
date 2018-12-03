@@ -30,6 +30,7 @@ MUTATION_RATE=0.1
 SELECTIVE_PRESSURE=2
 NB_GENERATIONS=50
 GENETIC_POOL_PATTERN="../cpp/genetic_pool/*.tsp"
+CITIES = pd.read_csv(CITIES_FILE, index_col=['CityId'])
 ########################################## END CONSTANTS ##########################################
 
 
@@ -105,7 +106,7 @@ def plot_path(path, coordinates, k=0):
 
 
 class Tour(list):  # list with trailing 0
-    penalized = ~cities.index.isin(sympy.primerange(0, len(cities)))
+    penalized = ~CITIES.index.isin(sympy.primerange(0, len(CITIES)))
 
     @staticmethod
     def from_file(filename):  # from linkern's output or csv
@@ -113,7 +114,7 @@ class Tour(list):  # list with trailing 0
         return Tour(seq if seq[-1] == 0 else (seq + [0]))
 
     def score(self):
-        df = cities.reindex(self)
+        df = CITIES.reindex(self)
         dist = np.hypot(df.X.diff(-1), df.Y.diff(-1))
         penalty = 0.1 * dist[9::10] * self.penalized[self[9::10]]
         _score = dist.sum() + penalty.sum()
@@ -329,7 +330,7 @@ def get_rank(pop_size, selection_pressure, position):
 
 if __name__ == "__main__":
 
-    cities = pd.read_csv(CITIES_FILE, index_col=['CityId'])
+
 
     population = generate_population()
 
