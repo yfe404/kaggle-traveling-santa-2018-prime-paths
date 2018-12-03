@@ -15,3 +15,7 @@ add_executable(main
     main.cc
     genome.cc
 )
+
+add_executable(gsx2
+    crossover.cc
+)
