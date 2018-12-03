@@ -64,10 +64,11 @@ function nn_opt(init_path::Vector{City}, start::Int, stop::Int, K::Int)
         end
         if bj != 0
             # Apply scoring on full path
-            reverse!(init_path, min(i,bj), max(i,bj))
+            aa, bb = i+(start-1), bj+(start-1)
+            reverse!(init_path, min(aa,bb), max(aa,bb))
             s = score(init_path)
-            reverse!(init_path, min(i,bj), max(i,bj))
-            push!(output, (s, i+(start-1), bj+(start-1)))
+            reverse!(init_path, min(aa,bb), max(aa,bb))
+            push!(output, (s, aa, bb))
         end
     end
 
