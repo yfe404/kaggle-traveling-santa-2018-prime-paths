@@ -38,8 +38,8 @@ function nn_opt(init_path::Vector{City}, start::Int, stop::Int, K::Int; verbose=
     output
 end
 
-start = parse(Int, ARGS[1])
-stop = parse(Int, ARGS[2])
+start = parse(Int, ARGS[1]) + 1
+stop = parse(Int, ARGS[2]) + 1
 cities_fp = ARGS[3]
 input_fp = ARGS[4]
 output_fp = ARGS[5]
@@ -59,7 +59,7 @@ output = nn_opt(path, start, stop, k)
 
 output_arr = ["$(length(output))"]
 for x in output
-    push!(output_arr, "$(x[1]) $(x[2]) $(x[3])")
+    push!(output_arr, "$(x[1]) $(x[2]-1) $(x[3]-1)")
 end
 
 write(output_fp, join(output_arr, "\n"))
