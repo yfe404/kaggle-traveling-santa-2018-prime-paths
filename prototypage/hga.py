@@ -23,6 +23,7 @@ from glob import glob
 ########################################## BEGIN CONSTANTS ##########################################
 CITIES_FILE="../input/cities.csv"
 PATH_TO_CROSSOVER_EXECUTABLE="../cpp/gsx2"
+PATH_TO_JULIA_SCRIPT="/home/yfe/kaggle-traveling-santa-2018-prime-paths/scripts_julia/ga_2opt.jl"
 NB_PROCESSES=26
 INDIV_SIZE=43
 POPULATION_SIZE=100
@@ -186,7 +187,7 @@ def mutate(indiv):
 
 ########################################## BEGIN MOCK JULIA ##########################################
 def task_julia(start, end, path_to_input, path_to_output, k=20):
-    call(["julia", "/home/yfe/kaggle-traveling-santa-2018-prime-paths/scripts_julia/ga_2opt.jl", str(start), str(end), "../input/cities.csv", path_to_input, path_to_output, str(k)])				
+    call(["julia", PATH_TO_JULIA_SCRIPT, str(start), str(end), "../input/cities.csv", path_to_input, path_to_output, str(k)])				
 ########################################## END MOCK JULIA ##########################################
 
 
