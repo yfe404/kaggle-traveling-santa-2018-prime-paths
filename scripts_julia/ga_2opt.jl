@@ -1,5 +1,11 @@
-push!(LOAD_PATH, "src/")
-import Pkg; Pkg.activate(".")
+git_root = strip(read(`git rev-parse --show-toplevel`, String))
+base_dir = joinpath(git_root, "scripts_julia")
+
+println("Running from $(pwd())")
+println("Base dir is $(base_dir)")
+
+push!(LOAD_PATH, joinpath(base_dir, "src/"))
+import Pkg; Pkg.activate(base_dir)
 using Santa
 
 # Score the swapping reversal of the path from k (inclusive) to l (inclusive)
