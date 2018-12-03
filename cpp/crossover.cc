@@ -15,19 +15,22 @@ using namespace std;
 
 typedef vector<int> Genome;
 
-vector<int> read_path(string filename);
+
+void write_to_file(const Genome& genome, string filename);
+Genome read_path(string filename);
 double randMToN(double M, double N);
 template<typename T>
 bool is_in(vector<T> const &v, T val);
 Genome crossover(const Genome &parent1, const Genome &parent2);
 void print_seq();
+
   
 int main(int argc, char** argv) 
 {
   // Check the number of parameters
-  if (argc < 3) {
+  if (argc != 4) {
     // Tell the user how to run the program
-    std::cerr << "Usage: " << argv[0] << " PATH_TO_PARENT1.TSP PATH_TO_PARENT2.TSP" << std::endl;
+    std::cerr << "Usage: " << argv[0] << " PATH_TO_PARENT1.TSP PATH_TO_PARENT2.TSP OUT.TSP" << std::endl;
     /* "Usage messages" are a conventional way of telling the user
      * how to run a program if they enter the command incorrectly.
      */
@@ -43,18 +46,18 @@ int main(int argc, char** argv)
   std::cout << "Crossover started...." << endl;
   auto offspring = crossover(genetic_seq1, genetic_seq2);
   std::cout << endl;
+  write_to_file(offspring, argv[3]);
   std::cout << "[DONE] GENETIC SEQUENCE PRODUCED!" << endl;
   
   return 0;
-
 } 
 
 
-vector<int> read_path(string filename) {
+Genome read_path(string filename) {
 
   string line;
   ifstream myfile (filename);
-  vector<int> path;
+  Genome path;
 
   if (myfile.is_open())
   {
@@ -76,6 +79,11 @@ vector<int> read_path(string filename) {
   return path;
 }
 
+void write_to_file(const Genome& genome, string filename) {
+  std::ofstream output_file(filename);
+  std::ostream_iterator<int> output_iterator(output_file, " ");
+  std::copy(genome.begin(), genome.end(), output_iterator);
+}
 
 
 Genome crossover(const Genome &parent1, const Genome &parent2) {
