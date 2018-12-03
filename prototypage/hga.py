@@ -25,9 +25,8 @@ CITIES_FILE="../input/cities.csv"
 PATH_TO_CROSSOVER_EXECUTABLE="../cpp/gsx2"
 PATH_TO_JULIA_SCRIPT="/home/yfe/kaggle-traveling-santa-2018-prime-paths/scripts_julia/ga_2opt.jl"
 NB_PROCESSES=26
-INDIV_SIZE=43
 POPULATION_SIZE=100
-MUTATION_RATE=0.1
+MUTATION_RATE=0.7
 SELECTIVE_PRESSURE=2
 NB_GENERATIONS=50
 GENETIC_POOL_PATTERN="../cpp/genetic_pool/*.tsp"
@@ -177,7 +176,7 @@ def mutate(indiv):
     assert new_genome[0]==new_genome[-1]==0
     assert len(set(new_genome))==len(new_genome)-1
     
-    return Individual(new_genome)
+    return new_genome
 
 
 ########################################## END GENETIC OPERATORS ##########################################
@@ -287,7 +286,7 @@ def run_2opt(route):
             route = swap_2opt(route, chosen_swap[1], chosen_swap[2])
             best_distance = route.score()
             #print(best_distance)
-
+            print("=================> {}".format(best_distance))
             OPTS = []
             
        
@@ -354,15 +353,17 @@ if __name__ == "__main__":
     
     
         if np.random.random() < MUTATION_RATE:
-            parent = population[-1] 
+            parent = population[-1]
             child = mutate(parent)
         else:
             p1 = population[-1] 
             p2 = population[-2] 
-        
             child = crossover(p1.path, p2.path)
 
         child = Individual(child)
+
+        if child.fitness > 1750000:
+            continue
 
         child.path = run_2opt(Tour(child.path))
         child.fitness = Tour(child.path).score()
