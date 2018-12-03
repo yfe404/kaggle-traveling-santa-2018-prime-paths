@@ -12,39 +12,26 @@ using Santa
 # OPTIMIZE: In this case we could precompute/cache closest cities since the path in chunk is not altered
 function nn_opt(init_path::Vector{City}, start::Int, stop::Int, K::Int; verbose=false)
     output = Vector{Tuple{Float64, Int, Int}}()
+    chunk = Chunk(copy(init_path), 1)
+    range = start+1:stop-1
 
-    # Original full path (from city 0 to city 0) for computing the end-to-end score
-    path = copy(init_path)
-
-    # Subset of the full path on which we search for the optimal 2-opt for every cities
-    chunk = Chunk(init_path[start:stop], start)
-
-    # Boundaries are left untouched
-    for chunk_i = 2:length(chunk.path)-1 
-        verbose && (chunk_i % 100 == 0) && print("\33[2K [$K-NN] $(i)/$(length(chunk.path))\r")
-
-        # best score diff, index of the best target swap in the full path ! (not chunk_j)
+    for (iteration, i) in enumerate(range)
+        verbose && (iteration % 100 == 0) && print("\33[2K [$K-NN] $(iteration)/$(length(range))\r")
         bv, bj = 0, 0
 
-        # NOTE: We perform the neighbor search on the full path !
-        for (_, path_j) in find_closest_cities(path, chunk.path[chunk_i], K)
-            chunk_j = path_j-start+1
-
-            # Protect boundaries AND IGNORE NEIGHBORS BEHIND CURRENT POSITION (j < i)
-            ((chunk_j <= 1) || (chunk_j < chunk_i) || (chunk_j == length(chunk.path))) && continue
-
-            s = score_2opt(chunk, min(chunk_i, chunk_j), max(chunk_i, chunk_j))
+        for (_, j) in find_closest_cities(chunk.path, chunk.path[i], K)
+            # Ignore neighbors behind the current position
+            ((j == 1) || (j == length(chunk.path)) || (j < i)) && continue
+            s = score_2opt(chunk, min(i, j), max(i, j))
             if s < bv
-                bv, bj = s, path_j
+                bv, bj = s, j
             end
         end
         if bj != 0
-            # Apply scoring on full path
-            path_i = chunk_i+start-1
-            reverse!(path, min(path_i, bj), max(path_i, bj))
-            s = score(path)
-            reverse!(path, min(path_i, bj), max(path_i, bj))
-            push!(output, (s, path_i, bj))
+            reverse!(chunk.path, min(i, bj), max(i, bj))
+            s = score(chunk)
+            reverse!(chunk.path, min(i, bj), max(i, bj))
+            push!(output, (s, i, bj))
         end
     end
 
