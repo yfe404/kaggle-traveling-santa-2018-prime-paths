@@ -80,7 +80,7 @@ Genome read_path(string filename) {
 }
 
 void write_to_file(const Genome& genome, string filename) {
-  std::ofstream output_file(filename);
+  std::ofstream output_file(filename, std::ofstream::out | std::ofstream::trunc);
   std::ostream_iterator<int> output_iterator(output_file, " ");
   std::copy(genome.begin(), genome.end(), output_iterator);
 }
@@ -99,6 +99,7 @@ Genome crossover(const Genome &parent1, const Genome &parent2) {
     assert(size1==size2);
     assert(parent1[0] == parent1[size1-1]);
     assert(parent2[0] == parent2[size2-1]);
+
     
     child.push_back(rnd_city);
     
