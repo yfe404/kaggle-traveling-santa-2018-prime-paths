@@ -23,7 +23,7 @@ from glob import glob
 ########################################## BEGIN CONSTANTS ##########################################
 CITIES_FILE="../input/cities.csv"
 PATH_TO_CROSSOVER_EXECUTABLE="../cpp/gsx2"
-NB_PROCESSES=4
+NB_PROCESSES=26
 INDIV_SIZE=43
 POPULATION_SIZE=100
 MUTATION_RATE=0.1
@@ -186,30 +186,7 @@ def mutate(indiv):
 
 ########################################## BEGIN MOCK JULIA ##########################################
 def task_julia(start, end, path_to_input, path_to_output, k=20):
-    ## Step1: load route 
-    route = read_from_file(path_to_input)
-    
-    ## Step2: Evaluate current distance
-    distance = Tour(route).score()
-    best_distance = distance
-    
-    ## Step3: Perform k-opt between start and end for the k neighbors
-    opts = []
-    for i in range(start, end):
-        for j in range(i+1, len(route)-1):
-            new_route = swap_2opt(route, i, j) 
-            new_distance = new_route.score()
-            if new_distance < best_distance:
-                opts.append((new_distance, i, j))
-
-    ## Step4: Write solutions to file
-    with open(path_to_output, "w") as f:
-        f.write(str(len(opts)))
-        f.write("\n")
-        for opt in opts:
-            f.write(str(opt[0]) + " " + str(opt[1]) + " " + str(opt[2]))
-            f.write("\n")
-
+    call(["julia", "/home/yfe/kaggle-traveling-santa-2018-prime-paths/scripts_julia/ga_2opt.jl", str(start), str(end), "../input/cities.csv", path_to_input, path_to_output, str(k)])				
 ########################################## END MOCK JULIA ##########################################
 
 
