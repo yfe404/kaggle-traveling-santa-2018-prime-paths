@@ -191,6 +191,30 @@ def task_julia(start, end, path_to_input, path_to_output, k=20):
 
 
 ########################################## BEGIN HEURISTICS ##########################################
+
+def swap_2opt(route, i, k):
+    """
+    swaps the endpoints of two edges by reversing a section of nodes, 
+    ideally to eliminate crossovers
+    returns the new route created with a the 2-opt swap
+    route - route to apply 2-opt
+    i - start index of the portion of the route to be reversed
+    k - index of last node in portion of route to be reversed
+    pre: 0 <= i < (len(route) - 1) and i < k < len(route)
+    post: length of the new route must match length of the given route 
+    """
+    assert i >= 0 and i < (len(route) - 1)
+    assert k > i and k < len(route)
+    new_route = route[0:i]
+    new_route.extend(reversed(route[i:k + 1]))
+#    reversed(route[i:k + 1])
+    new_route.extend(route[k+1:])
+    assert len(new_route)==len(route)
+    assert new_route[0]==new_route[-1]==0
+    assert len(set(new_route))==len(new_route)-1
+    return Tour(new_route)
+
+
 def run_2opt(route):
     """
     improves an existing route using the 2-opt swap until no improved route is found
