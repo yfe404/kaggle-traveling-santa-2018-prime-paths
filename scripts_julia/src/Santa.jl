@@ -21,10 +21,13 @@ export
     from_tsplib,
     to_tsplib,
     # knn.jl
-    find_closest_cities
+    find_closest_cities,
+    # opt.jl
+    score_2opt
 
 include("problem.jl")
 include("tsplib.jl")
 include("knn.jl")
+include("opt.jl")
 
 end
