@@ -1,0 +1,6 @@
+* Iterative Local Search
+
+
+
+** References
+- [[https://pdfs.semanticscholar.org/ab7c/c83bb513a91b06f6c8bc3b9da7f60cbbaee5.pdf][Combining 2-opt, 3-opt and 4-opt with k-swap-kick perturbations for the traveling salesman problem]]
