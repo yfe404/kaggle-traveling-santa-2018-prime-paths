@@ -23,12 +23,12 @@ from glob import glob
 ########################################## BEGIN CONSTANTS ##########################################
 CITIES_FILE="../input/cities.csv"
 PATH_TO_CROSSOVER_EXECUTABLE="../cpp/gsx2"
-PATH_TO_JULIA_SCRIPT="/home/yfe/kaggle-traveling-santa-2018-prime-paths/scripts_julia/ga_2opt.jl"
-NB_PROCESSES=4
+PATH_TO_JULIA_SCRIPT="/home/yfe/kaggle-traveling-santa-2018-prime-paths/scripts_julia/bin/ga_2opt.jl"
+NB_PROCESSES=26
 POPULATION_SIZE=100
 MUTATION_RATE=0.7
 SELECTIVE_PRESSURE=2
-NB_GENERATIONS=50
+NB_GENERATIONS=1000
 GENETIC_POOL_PATTERN="../cpp/genetic_pool/*.tsp"
 CITIES = pd.read_csv(CITIES_FILE, index_col=['CityId'])
 ########################################## END CONSTANTS ##########################################
