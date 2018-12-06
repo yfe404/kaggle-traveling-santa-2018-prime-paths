@@ -18,10 +18,13 @@ export
     read_path,
     # solver.jl
     solve_greedy,
-    solve_random
+    solve_random,
+    # k_opt.jl
+    score_2opt
 
 include("problem.jl")
 include("io.jl")
 include("solvers.jl")
+include("k_opt.jl")
 
 end

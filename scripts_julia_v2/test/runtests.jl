@@ -23,23 +23,13 @@ end
     @test score(solve_greedy(cities, 1)) == 1.8126021861388376e6
 end
 
-# @testset "2-opt" begin
-#     # Test with the full path
-#     c1 = Chunk(path, 1)
-
-#     # Edge cases are %10 +/- indices
-#     for i in [9,10,11], j in [19,20,21,34879]
-#         c2 = Chunk(reverse(path, i, j), 1)
-#         # Allow errors < 1e-6 since score_2opt may be more precise than
-#         # the score difference due to numerical errors
-#         @test score_2opt(c1, i, j) ≈ (score(c2) - score(c1)) atol=1e-6
-#     end
-
-#     # Test with a truncated path
-#     c1 = Chunk(path[1584:end], 1584)
-
-#     for i in [9,10,11], j in [19,20,21,34879]
-#         c2 = Chunk(reverse(path[1584:end], i, j), 1584)
-#         @test score_2opt(c1, i, j) ≈ (score(c2) - score(c1)) atol=1e-6
-#     end
-# end
+@testset "2-opt" begin
+    p1 = path
+    # Edge cases are %10 +/- indices
+    for i in [9,10,11], j in [19,20,21,34879]
+        p2 = reverse(path, i, j)
+        # Allow errors < 1e-6 since score_2opt may be more precise than
+        # the score difference due to numerical errors
+        @test score_2opt(p1, i, j) ≈ (score(p2) - score(p1)) atol=1e-6
+    end
+end
