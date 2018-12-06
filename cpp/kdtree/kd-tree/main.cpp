@@ -2,6 +2,7 @@
 #include <array>
 #include <vector>
 #include <cmath>
+#include <fstream>
 
 #include "kdtree.h"
 
@@ -30,18 +31,23 @@ int main(int argc, char **argv)
 	const int seed = argc > 1 ? std::stoi(argv[1]) : 0;
 	srand(seed);
 
-	// generate points
-	const int npoints = 100;
-	std::vector<MyPoint> points(npoints);
-	for (int i = 0; i < npoints; i++)
-	{
-		const int x = rand();
-		const int y = rand();
-		points[i] = MyPoint(x, y);
+	// loading points
+
+	std::vector<MyPoint> coords;
+
+	int n;
+	double x,y;
+	std::ifstream infile("data/kaggle.coords");
+
+	while(infile >> n) {
+	  infile >> x >> y;
+	  coords.push_back(MyPoint(x,y));
 	}
+	std::cout << "Successfully loaded " << coords.size() << " points." << std::endl;
+
 
 	// build k-d tree
-	kdt::KDTree<MyPoint> kdtree(points);
+	kdt::KDTree<MyPoint> kdtree(coords);
 
 	// build query
 	const MyPoint query(0.5, 0.5);
