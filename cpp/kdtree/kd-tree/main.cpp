@@ -2,6 +2,7 @@
 #include <vector>
 #include <cmath>
 #include <fstream>
+#include <random>
 #include <iostream>     // std::cout, std::fixed
 #include <iomanip>      // std::setprecision
 
@@ -11,6 +12,8 @@
 
 std::vector<int> read_primes();
 std::vector<Point> load_coords();
+Solution random_tour(const std::vector<Point>& coords);
+
 
 int main(int argc, char **argv)
 {
@@ -34,6 +37,10 @@ int main(int argc, char **argv)
   // build k-d tree
   kdt::KDTree<Point> kdtree(coords);
 
+  // create greedy solution
+  Solution sol = random_tour(coords);
+  std::cout << "Successfully created random solution with score of " << sol.distance(coords, primes) << std::endl;
+  
   // build query
   const Point query(coords[0]);
 	
@@ -92,5 +99,33 @@ std::vector<Point> load_coords() {
   }
   
   return coords;
+}
 
+template<typename T>
+bool is_in(std::vector<T> const &v, T val) {
+
+    auto it = find (v.begin(), v.end(), val);
+  
+    if (it != v.end())
+        return true;
+ 
+    return false;
+}
+
+Solution random_tour(const std::vector<Point>& coords) {
+  std::vector<int> cities;
+
+  std::random_device rd;
+  std::mt19937 g(rd());
+  
+  for (int i = 1; i < coords.size(); ++i) {
+    cities.push_back(i);
+  }
+
+  std::shuffle(cities.begin(), cities.end(), g);
+
+  cities.insert(cities.begin(), 0);
+  cities.push_back(0);
+
+  return Solution(cities);
 }
