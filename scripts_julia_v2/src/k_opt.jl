@@ -1,3 +1,12 @@
+function modrange(start, stop, n)
+    @assert stop >= start >= 0
+    if start % n == 0
+        return start:n:stop
+    else
+        return (start+n-(start%n)):n:stop
+    end
+end
+
 # 2-opt
 
 function score_2opt(path::Vector{City}, k::Int, l::Int)
@@ -23,12 +32,7 @@ function score_2opt(path::Vector{City}, k::Int, l::Int)
 
     penalties_diff = 0.0
 
-    start = (k % 10 == 0)*k
-    if start == 0
-        start = k+10-(k%10)
-    end
-
-    for i = start:10:l-1
+    for i in modrange(k, l-1, 10)
         penalties_diff +=
             (!path[l+k-i].p * distance(path[l+k-i].xy, path[l+k-i-1].xy)) -
             (!path[i].p * distance(path[i].xy, path[i+1].xy))

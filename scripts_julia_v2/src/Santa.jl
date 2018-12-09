@@ -20,7 +20,8 @@ export
     solve_greedy,
     solve_random,
     # k_opt.jl
-    score_2opt
+    score_2opt,
+    modrange
 
 include("problem.jl")
 include("io.jl")
