@@ -92,9 +92,13 @@ struct delta_t {
 
 __global__
 void two_opt_step(double** coords, delta_t* result, int* path, int path_size, int** nearest, bool*filled) {
+
+  int index = blockIdx.x * blockDim.x + threadIdx.x;
+    int stride = blockDim.x * gridDim.x;
+
   
-    for(unsigned int i = 0; i < path_size-2; ++i) {
-        for(unsigned int j = 0; j < 10; ++j) {
+    for(unsigned int i = index; i < path_size-2; i+=stride) {
+        for(unsigned int j = 0; j < 25; ++j) {
             int nn_j = nearest[path[i]][j];
             int pos_j = -1;
             int jj = 0;
@@ -196,7 +200,7 @@ int main(int argc, char **argv)
   const Point query(coords_points[0]);
 	
   // k-nearest neigbors search example
-  const int k = 10;
+  const int k = 25;
   const std::vector<int> knnIndices = kdtree.knnSearch(query, k);
 
   
@@ -219,15 +223,13 @@ int main(int argc, char **argv)
     
   }
 
-  for (int i = 0; i < coords_points.size(); i+=1000) {
-    std::cout << "[" << i << "] => ["; 
-    for (int j = 0; j < k-1; ++j) {
-      std::cout << nearest[i][j] << ", ";
-    }
-    std::cout << nearest[i][k-1] << "]" << std::endl;
-  }
+
 
   // Two-Opt
+  int blockSize = 64;
+  int numBlocks = (path_size + blockSize - 1) / blockSize;
+
+  
   bool improved = true;
     delta_t *result; // will contain the best move as a delta_t struct obj. 
     cudaMallocManaged(&result, (path_size-3)*sizeof(delta_t));
@@ -236,7 +238,7 @@ int main(int argc, char **argv)
     
     while(improved) {
         improved = false;
-        two_opt_step<<<1, 1>>>(coords, result, path_array, path_size, nearest, filled); // after this step, results contains all the pairs that improve path 
+        two_opt_step<<<numBlocks, blockSize>>>(coords, result, path_array, path_size, nearest, filled); // after this step, results contains all the pairs that improve path 
         // choose a move in results
         // if a move is chosen, update path, set improved to true, compute/print new total_distance for debugging if necessary
         // else => return;
@@ -255,9 +257,6 @@ int main(int argc, char **argv)
 	
   return 0;
 }
-
-
-
 
 
 std::vector<Point> load_coords() {
