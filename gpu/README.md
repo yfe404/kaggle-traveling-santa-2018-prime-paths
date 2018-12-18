@@ -6,7 +6,7 @@ mkdir build; cd build
 cmake ..
 ```
 
-Optionally, to specify the build type (default is release ?):
+Optionally, to specify the build type (default is release):
 ```bash
 # Debug build (for gdb)
 cmake -DCMAKE_BUILD_TYPE=Debug ..
