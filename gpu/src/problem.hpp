@@ -5,22 +5,26 @@
 
 using namespace std;
 
-typedef struct {
-    double x;
-    double y;
-} Coord;
+template <typename T>
+struct Coord {
+    T x;
+    T y;
+};
 
-typedef struct {
+template <typename T>
+struct City {
     int i;
     bool p;
-    Coord xy;
-} City;
+    Coord<T> xy;
+};
 
-double distance_l1(Coord a, Coord b) {
+template <typename T>
+double distance_l1(Coord<T> a, Coord<T> b) {
     return abs(a.x-b.x) + abs(a.y-b.y);
 }
 
-double distance_l2(Coord a, Coord b) {
+template <typename T>
+double distance_l2(Coord<T> a, Coord<T> b) {
     return sqrt(pow(a.x-b.x, 2) + pow(a.y-b.y, 2));
 }
 
