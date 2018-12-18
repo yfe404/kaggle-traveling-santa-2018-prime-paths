@@ -5,6 +5,10 @@
 #include "kdtree.hpp"
 #include "io.hpp"
 
+// NOTE: We use floats since single-precision arithmetic is
+// much faster than double precision on GPUs.
+#define PRECISION float
+
 int main(int argc, char const *argv[]) {
     if (argc != 3) {
         cout << "Usage: " << argv[0] << " CITIES PATH" << endl;
@@ -13,11 +17,8 @@ int main(int argc, char const *argv[]) {
 
     cout.precision(17);
 
-    // NOTE: We use floats since single-precision arithmetic is
-    // much faster than double precision on GPUs.
-
     cout << "Loading cities from " << argv[1] << "..." << endl;
-    auto cities = read_cities<double>(argv[1]);
+    auto cities = read_cities<PRECISION>(argv[1]);
     cout << "Loaded " << cities.size() << " cities" << endl;
 
     cout << "Loading path from " << argv[2] << "..." << endl;
@@ -28,6 +29,20 @@ int main(int argc, char const *argv[]) {
 
     cout << "Input path score = " << score(path) << endl;
 
+//   build k-d tree
+    kdt::KDTree<City<PRECISION>> kdtree(cities);
+
+  // build query
+    const City<PRECISION> query(cities[0]);
+
+  // k-nearest neigbors search example
+    const int k = 25;
+    const std::vector<int> knnIndices = kdtree.knnSearch(query, k);
+
+    for (auto i : knnIndices) {
+        cout << cities[i].xy.x << endl;
+    }
+ 
     // // Copy cities to unified memory
     // cout << "Copying to unified memory..." << endl;
     // City<float>* cuda_path;
@@ -71,18 +86,7 @@ int main(int argc, char const *argv[]) {
     // for (size_t i = 0; i < path.size(); i++) {
        // cout << distances_out[i] << endl;
     // }
-
-//   // build k-d tree
-//   kdt::KDTree<Point> kdtree(coords_points);
-
-//   // build query
-//   const Point query(coords_points[0]);
-	
-//   // k-nearest neigbors search example
-//   const int k = 25;
-//   const std::vector<int> knnIndices = kdtree.knnSearch(query, k);
-
-  
+ 
 //   // Build NN table [cityId] -> [NN0, NN1, ......, NNK]
 //   int** nearest;
     
