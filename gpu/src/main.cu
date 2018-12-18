@@ -20,46 +20,13 @@ int main(int argc, char const *argv[]) {
     }
 
     // Copy cities to unified memory
-    // City<double>* cuda_cities;
-    // cudaMallocManaged(&cuda_cities, cities.size()*sizeof(City<double>));
-    // for (size_t i = 0; i < cities.size(); i++) {
-        // cuda_cities[i] = &cities[i];
-    // }
-
-    double* coords;
-    cudaMallocManaged(&coords, 1000*sizeof(double));
-    for (size_t i = 0; i < 1000; i++) {
-        coords[i] = 10.0;
+    cout << "Copying to unified memory..." << endl;
+    City<double>* cuda_path;
+    cudaMallocManaged(&cuda_path, path.size()*sizeof(City<double>));
+    for (size_t i = 0; i < path.size(); i++) {
+        cuda_path[i] = path[i];
     }
 
-
-    // cudaMallocManaged()
-
-//   // loading points
-//   auto coords_points = load_coords();
-
-//   double** coords;
-
-//   cudaMallocManaged(&coords, coords_points.size()*sizeof(double*));
-//   for (unsigned int i = 0; i < coords_points.size(); ++i) {
-//     cudaMallocManaged(& coords[i], 2*sizeof(double));
-//     	coords[i][0] = coords_points[i][0];
-// 	coords[i][1] = coords_points[i][1];
-//   }
-  
-
-  
-//   std::cout << "Successfully loaded " << coords_points.size() << " points." << std::endl;
-
-//   auto path = read_path("./1517078.tsp");
-//   int path_size = path.size();
-
-//   int *path_array;
-//   cudaMallocManaged(&path_array, path_size*sizeof(int));
-//   for(unsigned int i = 0; i < path_size; ++i)
-//     path_array[i] = path[i];
-
-  
 //   // build k-d tree
 //   kdt::KDTree<Point> kdtree(coords_points);
 
