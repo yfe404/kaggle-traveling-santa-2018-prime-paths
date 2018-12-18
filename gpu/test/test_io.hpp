@@ -26,6 +26,7 @@ class TestIO : public CxxTest::TestSuite {
         TS_ASSERT_EQUALS(path[0].i, 0);
         TS_ASSERT_EQUALS(path[197769].i, 0);
         TS_ASSERT_DIFFERS(&cities[0], &path[0]);
+        TS_ASSERT_EQUALS(score(path), 1516773.9447755208);
         TS_ASSERT(is_valid(path.begin(), path.end()));
     }
 
