@@ -1,4 +1,9 @@
+#ifndef PROBLEM_HPP
+#define PROBLEM_HPP
+
 #include <cmath>
+
+using namespace std;
 
 typedef struct {
     double x;
@@ -18,3 +23,5 @@ double distance_l1(Coord a, Coord b) {
 double distance_l2(Coord a, Coord b) {
     return sqrt(pow(a.x-b.x, 2) + pow(a.y-b.y, 2));
 }
+
+#endif

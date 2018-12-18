@@ -15,6 +15,11 @@ if(CXXTEST_FOUND)
         test_problem.cpp
         ${CMAKE_CURRENT_SOURCE_DIR}/test/test_problem.hpp
     )
+    CXXTEST_ADD_TEST(
+        test_io
+        test_io.cpp
+        ${CMAKE_CURRENT_SOURCE_DIR}/test/test_io.hpp
+    )
 endif()
 
 # https://devblogs.nvidia.com/building-cuda-applications-cmake/
