@@ -8,10 +8,10 @@ cmake ..
 
 Optionally, to specify the build type (default is release ?):
 ```bash
-# Release build (with optimizations)
-cmake -DCMAKE_BUILD_TYPE=Release ..
 # Debug build (for gdb)
 cmake -DCMAKE_BUILD_TYPE=Debug ..
+# Release build (with optimizations)
+cmake -DCMAKE_BUILD_TYPE=Release ..
 ```
 
 To build the project:
