@@ -30,6 +30,7 @@ vector<City<double>> read_cities(string fp) {
         }
         file.close();
     }
+
     return cities;
 }
 
