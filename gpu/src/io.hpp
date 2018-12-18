@@ -33,8 +33,9 @@ vector<City<double>> read_cities(string fp) {
     return cities;
 }
 
-vector<City<double>> read_path(vector<City<double>> &cities, string fp) {
-    vector<City<double>> path;
+template <typename T>
+vector<City<T>> read_path(vector<City<T>> &cities, string fp) {
+    vector<City<T>> path;
     ifstream file(fp);
 
     if (file.is_open()) {
