@@ -28,4 +28,9 @@ T distance_l2(Coord<T> a, Coord<T> b) {
     return sqrt(pow(a.x-b.x, 2) + pow(a.y-b.y, 2));
 }
 
+template <class InputIt>
+bool is_valid(InputIt first, InputIt last) {
+    return (first->i == 0) && (last->i == 0) && (last-first == 197770);
+}
+
 #endif

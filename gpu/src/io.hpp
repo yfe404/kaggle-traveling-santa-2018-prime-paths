@@ -59,14 +59,15 @@ vector<City<T>> read_path(vector<City<T>> &cities, string fp) {
     return path;
 }
 
-template <typename T>
-void write_path(vector<City<T>> &cities, string fp) {
+// TODO: Constrain to City iterators (possible in C++ ?)
+template <class InputIt>
+void write_path(InputIt first, InputIt last, string fp) {
     ofstream file(fp);
     stringstream ss;
 
     ss << "Path" << endl;
-    for (auto &c : cities) {
-        ss << c.i << endl;
+    for(; first != last; first++) {
+        ss << first->i << endl;
     }
 
     if (file.is_open()) {

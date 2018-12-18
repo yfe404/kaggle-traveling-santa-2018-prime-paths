@@ -26,13 +26,14 @@ class TestIO : public CxxTest::TestSuite {
         TS_ASSERT_EQUALS(path[0].i, 0);
         TS_ASSERT_EQUALS(path[197769].i, 0);
         TS_ASSERT_DIFFERS(&cities[0], &path[0]);
+        TS_ASSERT(is_valid(path.begin(), path.end()));
     }
 
     void testWritePath(void) {
         vector<City<double>> cities = read_cities("../test/cities.csv");
         vector<City<double>> path = read_path(cities, "../test/1516773.csv");
         string fp = "path.tmp";
-        write_path(path, fp);
+        write_path(path.begin(), path.end(), fp);
         vector<City<double>> new_path = read_path(cities, fp);
         TS_ASSERT_EQUALS(path.size(), new_path.size());
         for (size_t i = 0; i < path.size(); i++) {
