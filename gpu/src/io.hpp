@@ -12,8 +12,9 @@
 
 using namespace std;
 
-vector<City<double>> read_cities(string fp) {
-    vector<City<double>> cities;
+template <typename T>
+vector<City<T>> read_cities(string fp) {
+    vector<City<T>> cities;
     ifstream file(fp);
 
     if (file.is_open()) {
@@ -25,8 +26,8 @@ vector<City<double>> read_cities(string fp) {
         while (getline(file, line)) {
             vector<string> tokens = split(line, ',');
             int id = stoi(tokens[0]);
-            double x = stod(tokens[1]);
-            double y = stod(tokens[2]);
+            T x = stod(tokens[1]);
+            T y = stod(tokens[2]);
             cities.push_back({id, is_prime(id), {x, y}});
         }
         file.close();

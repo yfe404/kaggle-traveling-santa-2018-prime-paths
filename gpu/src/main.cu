@@ -9,20 +9,22 @@ int main(int argc, char const *argv[]) {
         return 1;
     }
 
+    // NOTE: We use floats since single-precision arithmetic is
+    // much faster than double precision on GPUs.
     cout << "Loading cities from " << argv[1] << "..." << endl;
-    vector<City<double>> cities = read_cities(argv[1]);
+    vector<City<float>> cities = read_cities<float>(argv[1]);
     cout << "Loaded " << cities.size() << " cities" << endl;
 
     cout << "Loading path from " << argv[2] << "..." << endl;
-    vector<City<double>> path = read_path(cities, argv[2]);
+    vector<City<float>> path = read_path(cities, argv[2]);
     if (!is_valid(path.begin(), path.end())) {
         cout << "Input path is not valid !";
     }
 
     // Copy cities to unified memory
     cout << "Copying to unified memory..." << endl;
-    City<double>* cuda_path;
-    cudaMallocManaged(&cuda_path, path.size()*sizeof(City<double>));
+    City<float>* cuda_path;
+    cudaMallocManaged(&cuda_path, path.size()*sizeof(City<float>));
     for (size_t i = 0; i < path.size(); i++) {
         cuda_path[i] = path[i];
     }
