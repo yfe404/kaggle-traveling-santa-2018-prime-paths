@@ -3,6 +3,15 @@
 #include "problem.hpp"
 #include "io.hpp"
 
+__global__
+void distances(float* out, City<float>* path, size_t path_size) {
+    int index = blockIdx.x * blockDim.x + threadIdx.x;
+    int stride = blockDim.x * gridDim.x;
+    for (size_t i = index; i < path_size-1; i += stride) {
+        out[i] = sqrt(pow(path[i].xy.x-path[i+1].xy.x, 2) + pow(path[i].xy.y-path[i+1].xy.y, 2));
+    }
+}
+
 int main(int argc, char const *argv[]) {
     if (argc != 3) {
         cout << "Usage: " << argv[0] << " CITIES PATH" << endl;
@@ -11,12 +20,13 @@ int main(int argc, char const *argv[]) {
 
     // NOTE: We use floats since single-precision arithmetic is
     // much faster than double precision on GPUs.
+
     cout << "Loading cities from " << argv[1] << "..." << endl;
-    vector<City<float>> cities = read_cities<float>(argv[1]);
+    auto cities = read_cities<float>(argv[1]);
     cout << "Loaded " << cities.size() << " cities" << endl;
 
     cout << "Loading path from " << argv[2] << "..." << endl;
-    vector<City<float>> path = read_path(cities, argv[2]);
+    auto path = read_path(cities, argv[2]);
     if (!is_valid(path.begin(), path.end())) {
         cout << "Input path is not valid !";
     }
@@ -27,6 +37,22 @@ int main(int argc, char const *argv[]) {
     cudaMallocManaged(&cuda_path, path.size()*sizeof(City<float>));
     for (size_t i = 0; i < path.size(); i++) {
         cuda_path[i] = path[i];
+    }
+
+    int N = path.size() - 1;
+    int blockSize = 256;
+    int numBlocks = (N + blockSize - 1) / blockSize;
+
+    // Compute distances on GPU
+    float* distances_out;
+    cudaMallocManaged(&distances_out, (path.size()-1)*sizeof(float));
+    distances<<<blockSize, numBlocks>>>(distances_out, cuda_path, path.size());
+
+    // Wait for GPU to finish before accessing on host
+    cudaDeviceSynchronize();
+
+    for (size_t i = 0; i < path.size(); i++) {
+        cout << distances_out[i] << endl;
     }
 
 //   // build k-d tree
