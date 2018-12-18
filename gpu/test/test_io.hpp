@@ -17,7 +17,9 @@ class TestIO : public CxxTest::TestSuite {
     void testReadPath(void) {
         vector<City<double>> cities = read_cities("../test/cities.csv");
         vector<City<double>> path = read_path(cities, "../test/1516773.csv");
+        TS_ASSERT_EQUALS(path.size(), 197770);
         TS_ASSERT_EQUALS(path[0].i, 0);
+        TS_ASSERT_EQUALS(path[197769].i, 0);
         TS_ASSERT_DIFFERS(&cities[0], &path[0]);
     }
 };
