@@ -2,6 +2,7 @@
 #define IO_HPP
 
 #include <fstream>
+#include <iostream>
 #include <string>
 #include <vector>
 
@@ -29,6 +30,8 @@ vector<City<double>> read_cities(string fp) {
             cities.push_back({id, is_prime(id), {x, y}});
         }
         file.close();
+    } else {
+        cerr << "Failed to open " << fp << endl;
     }
 
     return cities;
@@ -49,9 +52,25 @@ vector<City<T>> read_path(vector<City<T>> &cities, string fp) {
             // NOTE: This push a copy (important, so that we don't alter cities afterwards)
             path.push_back(cities[stoi(line)]);
         }
+    } else {
+        cerr << "Failed to open " << fp << endl;
     }
 
     return path;
+}
+
+template <typename T>
+void write_path(vector<City<T>> &cities, string fp) {
+    ofstream file(fp);
+    if (file.is_open()) {
+        file << "Path" << endl;
+        for (auto &c : cities) {
+            file << c.i << endl;
+        }
+        file.close();
+    } else {
+        cerr << "Failed to open " << fp << endl;
+    }
 }
 
 #endif
