@@ -1,3 +1,5 @@
+#include <iostream>
+
 #include "problem.hpp"
 #include "io.hpp"
 
