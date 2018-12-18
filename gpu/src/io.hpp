@@ -62,11 +62,15 @@ vector<City<T>> read_path(vector<City<T>> &cities, string fp) {
 template <typename T>
 void write_path(vector<City<T>> &cities, string fp) {
     ofstream file(fp);
+    stringstream ss;
+
+    ss << "Path" << endl;
+    for (auto &c : cities) {
+        ss << c.i << endl;
+    }
+
     if (file.is_open()) {
-        file << "Path" << endl;
-        for (auto &c : cities) {
-            file << c.i << endl;
-        }
+        file << ss.str();
         file.close();
     } else {
         cerr << "Failed to open " << fp << endl;
