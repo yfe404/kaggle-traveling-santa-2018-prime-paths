@@ -19,12 +19,12 @@ struct City {
 };
 
 template <typename T>
-double distance_l1(Coord<T> a, Coord<T> b) {
+T distance_l1(Coord<T> a, Coord<T> b) {
     return abs(a.x-b.x) + abs(a.y-b.y);
 }
 
 template <typename T>
-double distance_l2(Coord<T> a, Coord<T> b) {
+T distance_l2(Coord<T> a, Coord<T> b) {
     return sqrt(pow(a.x-b.x, 2) + pow(a.y-b.y, 2));
 }
 
