@@ -1,26 +1,8 @@
 #include <iostream>
 #include <chrono>
 
-#include "problem.hpp"
-#include "io.hpp"
-
-__global__
-void distances_l1(float* out, City<float>* path, size_t path_size) {
-    int index = blockIdx.x * blockDim.x + threadIdx.x;
-    int stride = blockDim.x * gridDim.x;
-    for (size_t i = index; i < path_size-1; i += stride) {
-        out[i] = abs(path[i].xy.x-path[i+1].xy.x) + abs(path[i].xy.y-path[i+1].xy.y);
-    }
-}
-
-__global__
-void distances_l2(float* out, City<float>* path, size_t path_size) {
-    int index = blockIdx.x * blockDim.x + threadIdx.x;
-    int stride = blockDim.x * gridDim.x;
-    for (size_t i = index; i < path_size-1; i += stride) {
-        out[i] = sqrt(pow(path[i].xy.x-path[i+1].xy.x, 2) + pow(path[i].xy.y-path[i+1].xy.y, 2));
-    }
-}
+#include "../problem.hpp"
+#include "../io.hpp"
 
 int main(int argc, char const *argv[]) {
     if (argc != 3) {
@@ -28,11 +10,13 @@ int main(int argc, char const *argv[]) {
         return 1;
     }
 
+    cout.precision(17);
+
     // NOTE: We use floats since single-precision arithmetic is
     // much faster than double precision on GPUs.
 
     cout << "Loading cities from " << argv[1] << "..." << endl;
-    auto cities = read_cities<float>(argv[1]);
+    auto cities = read_cities<double>(argv[1]);
     cout << "Loaded " << cities.size() << " cities" << endl;
 
     cout << "Loading path from " << argv[2] << "..." << endl;
@@ -41,49 +25,51 @@ int main(int argc, char const *argv[]) {
         cout << "Input path is not valid !";
     }
 
-    // Copy cities to unified memory
-    cout << "Copying to unified memory..." << endl;
-    City<float>* cuda_path;
-    cudaMallocManaged(&cuda_path, path.size()*sizeof(City<float>));
-    for (size_t i = 0; i < path.size(); i++) {
-        cuda_path[i] = path[i];
-    }
+    cout << "Input path score = " << score(path) << endl;
 
-    int N = path.size() - 1;
-    int blockSize = 512;
-    int numBlocks = (N + blockSize - 1) / blockSize;
+    // // Copy cities to unified memory
+    // cout << "Copying to unified memory..." << endl;
+    // City<float>* cuda_path;
+    // cudaMallocManaged(&cuda_path, path.size()*sizeof(City<float>));
+    // for (size_t i = 0; i < path.size(); i++) {
+    //     cuda_path[i] = path[i];
+    // }
 
-    // Compute distances on GPU
-    float* distances_out;
-    cudaMallocManaged(&distances_out, (path.size()-1)*sizeof(float));
-    auto t1 = chrono::high_resolution_clock::now();
-    distances_l1<<<blockSize, numBlocks>>>(distances_out, cuda_path, path.size());
+    // int N = path.size() - 1;
+    // int blockSize = 512;
+    // int numBlocks = (N + blockSize - 1) / blockSize;
 
-
-    // Wait for GPU to finish before accessing on host
-    cudaDeviceSynchronize();
-    auto t2 = chrono::high_resolution_clock::now();
-
-    std::cout << "Delta t2-t1: " 
-	                  << std::chrono::duration_cast<std::chrono::nanoseconds>(t2 - t1).count()
-			                << " nanoseconds" << std::endl;
-
-    // Compute distances on GPU
-    t1 = chrono::high_resolution_clock::now();
-    distances_l2<<<blockSize, numBlocks>>>(distances_out, cuda_path, path.size());
-
-    // Wait for GPU to finish before accessing on host
-    cudaDeviceSynchronize();
-    t2 = chrono::high_resolution_clock::now();
-
-    std::cout << "Delta t2-t1: " 
-	                  << std::chrono::duration_cast<std::chrono::nanoseconds>(t2 - t1).count()
-			                << " nanoseconds" << std::endl;
+    // // Compute distances on GPU
+    // float* distances_out;
+    // cudaMallocManaged(&distances_out, (path.size()-1)*sizeof(float));
+    // auto t1 = chrono::high_resolution_clock::now();
+    // distances_l1<<<blockSize, numBlocks>>>(distances_out, cuda_path, path.size());
 
 
-    for (size_t i = 0; i < path.size(); i++) {
+    // // Wait for GPU to finish before accessing on host
+    // cudaDeviceSynchronize();
+    // auto t2 = chrono::high_resolution_clock::now();
+
+    // std::cout << "Delta t2-t1: " 
+	//                   << std::chrono::duration_cast<std::chrono::nanoseconds>(t2 - t1).count()
+	// 		                << " nanoseconds" << std::endl;
+
+    // // Compute distances on GPU
+    // t1 = chrono::high_resolution_clock::now();
+    // distances_l2<<<blockSize, numBlocks>>>(distances_out, cuda_path, path.size());
+
+    // // Wait for GPU to finish before accessing on host
+    // cudaDeviceSynchronize();
+    // t2 = chrono::high_resolution_clock::now();
+
+    // std::cout << "Delta t2-t1: " 
+	//                   << std::chrono::duration_cast<std::chrono::nanoseconds>(t2 - t1).count()
+	// 		                << " nanoseconds" << std::endl;
+
+
+    // for (size_t i = 0; i < path.size(); i++) {
        // cout << distances_out[i] << endl;
-    }
+    // }
 
 //   // build k-d tree
 //   kdt::KDTree<Point> kdtree(coords_points);
