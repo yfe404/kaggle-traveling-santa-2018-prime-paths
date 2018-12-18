@@ -1,8 +1,9 @@
 #include <iostream>
 #include <chrono>
 
-#include "../problem.hpp"
-#include "../io.hpp"
+#include "problem.hpp"
+#include "kdtree.hpp"
+#include "io.hpp"
 
 int main(int argc, char const *argv[]) {
     if (argc != 3) {

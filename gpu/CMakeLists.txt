@@ -14,7 +14,7 @@ set(CMAKE_CXX_FLAGS_DEBUG "-g")
 set(CMAKE_CXX_FLAGS_RELEASE "-Ofast")
 
 # Executables
-add_executable(k_opt src/cuda/k_opt.cu)
+add_executable(k_opt src/k_opt.cu)
 
 # Tests
 find_package(CxxTest)
