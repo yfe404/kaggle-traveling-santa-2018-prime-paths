@@ -17,6 +17,9 @@ struct City {
     int i;
     bool p;
     Coord<T> xy;
+    // Compatibility with kdtree.hpp
+    static const int DIM = 2;
+    const T& operator[](size_t i) const {if (i==0) {return xy.x;} else {return xy.y;}}
 };
 
 template <typename T>
