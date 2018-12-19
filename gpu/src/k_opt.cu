@@ -59,6 +59,20 @@ void two_opt_pass_gpu_kernel(City<T>* path, int path_size, int** neighbors_idxs,
 // Host Code
 // ---------
 
+// Build NN table [cityId] -> [NN0, NN1, ......, NNK]
+template <typename T>
+vector<vector<int>> build_nn_table(vector<City<T>> path, int k) {
+    vector<vector<int>> neighbors_idxs;
+    kdt::KDTree<City<T>> kdtree(path);
+    for (size_t i = 0; i < path.size(); ++i) {
+        // k+1 because the first one is the point itself
+        auto knnIndices = kdtree.knnSearch(path[i], k+1);
+        knnIndices.erase(knnIndices.begin());
+        neighbors_idxs.push_back(knnIndices);
+    }
+    return neighbors_idxs;
+}
+
 // CPU single-threaded 2-opt
 template <typename T>
 vector<City<T>> two_opt_pass_cpu(vector<City<T>> path, int k) {
@@ -89,24 +103,13 @@ vector<City<T>> two_opt_pass_cpu(vector<City<T>> path, int k) {
 // GPU multi-threaded 2-opt
 template <typename T>
 vector<City<T>> two_opt_pass_gpu(vector<City<T>> path, int k) {
-    kdt::KDTree<City<T>> kdtree(path);
-
     // Build NN table [cityId] -> [NN0, NN1, ......, NNK]
-    int** neighbors_idxs;
-    cudaMallocManaged(&neighbors_idxs, path.size()*sizeof(int*));
+    auto neighbors_idxs = build_nn_table(path, k);
+    int** gpu_neighbors_idxs;
+    cudaMallocManaged(&gpu_neighbors_idxs, path.size()*sizeof(int*));
 
     for (size_t i = 0; i < path.size(); ++i) {
-        int* idxs;
-        cudaMallocManaged(&idxs, k*sizeof(int));
-
-        // k+1 because the first one is the point itself
-        // NOTE: Remove this loop and use CUDA memcpy ?
-        auto knnIndices = kdtree.knnSearch(path[i], k+1);
-        for (size_t j = 1; j <= k; ++j) {
-            idxs[i-1] = knnIndices[i];
-        }
-
-        neighbors_idxs[i] = idxs;
+        gpu_neighbors_idxs[i] = &neighbors_idxs[i][0];
     }
 
     // Two-Opt
@@ -130,7 +133,7 @@ vector<City<T>> two_opt_pass_gpu(vector<City<T>> path, int k) {
 
     // Call GPU kernel
     two_opt_pass_gpu_kernel<<<numBlocks, blockSize>>>(
-        gpu_path, path.size(), neighbors_idxs, k, results
+        gpu_path, path.size(), gpu_neighbors_idxs, k, results
     );
     cudaDeviceSynchronize();
 
