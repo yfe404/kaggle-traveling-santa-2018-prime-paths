@@ -3,6 +3,7 @@
 
 #include "problem.hpp"
 #include "kdtree.hpp"
+#include "k_opt.hpp"
 #include "io.hpp"
 
 // NOTE: We use floats since single-precision arithmetic is

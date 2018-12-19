@@ -22,16 +22,20 @@ T two_opt_score(City<T>* path, int k, int l) {
 
     T diff = (a_l - a_k) + (k_b - l_b);
 
-    // penalties_diff = 0.0
+    T penalties_diff = 0.0;
 
-    // for i in modrange(k, l-1, 10)
-    //     penalties_diff +=
-    //         (!path[l+k-i].p * distance(path[l+k-i].xy, path[l+k-i-1].xy)) -
-    //         (!path[i].p * distance(path[i].xy, path[i+1].xy))
-    // end
+    int start = (k % 10 == 0)*k;
+    if (start == 0) {
+        start = k+10-(k%10);
+    }
 
-    // diff + penalties_diff*0.1
-    return diff;
+    for (int i = start; i < l; i += 10) {
+        penalties_diff +=
+            (!path[l+k-i].p * distance_l2(path[l+k-i].xy, path[l+k-i-1].xy)) -
+            (!path[i].p * distance_l2(path[i].xy, path[i+1].xy));
+    }
+
+    return diff + penalties_diff*0.1;
 }
 
 #endif
