@@ -48,7 +48,6 @@ void two_opt_pass_gpu_kernel(City<T>* path, int path_size, int** neighbors_idxs,
         for (int z = 0; z < n_neighbors; ++z) {
             int j = neighbors_idxs[i][z];
             if (j <= i) continue;
-
             T s = two_opt_score(path, i, j);
             if (s < results[i].delta) {
                 results[i] = {i, j, s};
@@ -119,11 +118,16 @@ vector<City<T>> two_opt_pass_gpu(vector<City<T>> path, int k) {
     }
 
     // Call GPU kernel
+    auto start = chrono::steady_clock::now();
     two_opt_pass_gpu_kernel<<<numBlocks, blockSize>>>(
         gpu_path, path.size(), gpu_neighbors_idxs, k, results
     );
     cudaDeviceSynchronize();
 
+    auto finish = chrono::steady_clock::now();
+    cout << "Time: " << chrono::duration_cast<chrono::duration<double> >(finish - start).count() << " seconds" << endl;
+
+    
     // TODO: Maximize profit and apply to new_path
     auto new_path(path);
 
