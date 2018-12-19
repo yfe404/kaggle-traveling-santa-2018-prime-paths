@@ -14,10 +14,16 @@ class TestKopt : public CxxTest::TestSuite {
         for (int i = 8; i <= 12; i++) {
             for (int j = 18; j <= 22; j++) {
                 vector<City<double>> path2(path);
-                reverse(path2.begin() + i, path2.begin() + j);
-                TS_ASSERT_EQUALS(
+                // C++ reverse is [first, last)
+                // Julia reverse is [first, last]
+                // Hence the +1
+                reverse(path2.begin()+i, path2.begin()+j+1);
+                // Allow errors < 1e-6 since two_opt_score may be more precise than
+                // the score difference due to numerical errors
+                TS_ASSERT_DELTA(
                     two_opt_score(&path[0], i, j),
-                    score(path2) - score(path)
+                    score(path2) - score(path),
+                    1e-6
                 );
             }
         }
