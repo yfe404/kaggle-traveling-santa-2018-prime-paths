@@ -45,23 +45,20 @@ vector<City<T>> two_opt_pass_cpu(vector<City<T>> path, int k) {
     // This is not a greedy 2-opt, instead (like the GPU impl.) we
     // search for the best 2-opt for each index, and then maximize
     // the set of non-overlapping 2-opt to apply.
-    vector<delta_t<T>> results;
+    vector<delta_t<T>> results(path.size(), {0, 0, 0});
 
     for (int i = 1; i < path.size(); i++) {
         // k+1 because the first one is the point itself
-        vector<int> knnIndices = kdtree.knnSearch(path[i], k+1);
-        delta_t<T> best = {0, 0, 0};
-
-        for (int j : knnIndices) {
+        for (int j : kdtree.knnSearch(path[i], k+1)) {
             // TODO: Stop if neighbor well-placed
             T s = two_opt_score(&path[0], i, j);
-            if (s < best.delta) {
-                best = {i, j, s};
+            if (s < results[i].delta) {
+                results[i] = {i, j, s};
             }
         }
-
-        results.push_back(best);
     }
+
+    // TODO: Maximize profit and apply to new_path
 
     return path;
 }
@@ -146,6 +143,8 @@ int main(int argc, char const *argv[]) {
         return 1;
     }
 
+    chrono::time_point<chrono::steady_clock> start;
+    chrono::time_point<chrono::steady_clock> finish;
     cout.precision(17);
 
     cout << "Loading cities from " << argv[1] << "..." << endl;
@@ -161,7 +160,10 @@ int main(int argc, char const *argv[]) {
     cout << "Input path score = " << score(path) << endl;
 
     cout << "2-opt pass (CPU)" << endl;
+    start = chrono::steady_clock::now();
     auto new_path = two_opt_pass_cpu(path, 15);
+    finish = chrono::steady_clock::now();
+    cout << "Time: " << chrono::duration_cast<chrono::duration<double> >(finish - start).count() << " seconds" << endl;
     cout << "New score = " << score(new_path) << endl;
 
     // cout << "2-opt pass (GPU)" << endl;
