@@ -3,6 +3,9 @@
 
 #include "problem.hpp"
 
+// 2-opt
+// -----
+
 template <typename T>
 T two_opt_score(City<T>* path, int k, int l) {
     // before: a k ... l b
@@ -37,5 +40,15 @@ T two_opt_score(City<T>* path, int k, int l) {
 
     return diff + penalties_diff*0.1;
 }
+
+// 3-opt
+// -----
+
+// TODO
+
+// 4-opt
+// -----
+
+// TODO
 
 #endif

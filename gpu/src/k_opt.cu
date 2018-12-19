@@ -4,6 +4,7 @@
 #include "problem.hpp"
 #include "kdtree.hpp"
 #include "k_opt.hpp"
+#include "knn.hpp"
 #include "io.hpp"
 
 // NOTE: We use floats since single-precision arithmetic is
@@ -59,20 +60,6 @@ void two_opt_pass_gpu_kernel(City<T>* path, int path_size, int** neighbors_idxs,
 // Host Code
 // ---------
 
-// Build NN table [cityId] -> [NN0, NN1, ......, NNK]
-template <typename T>
-vector<vector<int>> build_nn_table(vector<City<T>> path, int k) {
-    vector<vector<int>> neighbors_idxs;
-    kdt::KDTree<City<T>> kdtree(path);
-    for (size_t i = 0; i < path.size(); ++i) {
-        // k+1 because the first one is the point itself
-        auto knnIndices = kdtree.knnSearch(path[i], k+1);
-        knnIndices.erase(knnIndices.begin());
-        neighbors_idxs.push_back(knnIndices);
-    }
-    return neighbors_idxs;
-}
-
 // CPU single-threaded 2-opt
 template <typename T>
 vector<City<T>> two_opt_pass_cpu(vector<City<T>> path, int k) {
@@ -104,7 +91,7 @@ vector<City<T>> two_opt_pass_cpu(vector<City<T>> path, int k) {
 template <typename T>
 vector<City<T>> two_opt_pass_gpu(vector<City<T>> path, int k) {
     // Build NN table [cityId] -> [NN0, NN1, ......, NNK]
-    auto neighbors_idxs = build_nn_table(path, k);
+    auto neighbors_idxs = get_knn(path, k);
     int** gpu_neighbors_idxs;
     cudaMallocManaged(&gpu_neighbors_idxs, path.size()*sizeof(int*));
 
