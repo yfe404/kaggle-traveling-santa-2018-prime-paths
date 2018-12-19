@@ -37,7 +37,8 @@ bool is_valid(InputIt first, InputIt last) {
     return (first->i == 0) && (last->i == 0) && (last-first == 197770);
 }
 
-// TODO: Use iterators (but will be slower ?)
+// TODO: This does not seems to be vectorized (it takes ~1.4s, instead of an expected 400us)
+// Apparently not all compiler can auto-vectorize std::vector code, so maybe we should use an array...
 template <typename T>
 T score(vector<City<T>> path, int start = 0) {
     T score = 0.0;
