@@ -44,8 +44,10 @@ void two_opt_pass_gpu_kernel(City<T>* path, int path_size, int** neighbors_idxs,
     int stride = blockDim.x * gridDim.x;
 
     for (int i = index; i < path_size-2; i += stride) {
-        for (int j = 0; j < n_neighbors; ++j) {
-            if (j <= i) continue;
+        for (int z = 0; z < n_neighbors; ++z) {
+            int j = neighbors_idxs[i][z];
+            if (z <= i) continue;
+            
             T s = two_opt_score(path, i, j);
             if (s < results[i].delta) {
                 results[i] = {i, j, s};
