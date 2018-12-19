@@ -5,7 +5,7 @@
 - Generic code for coordinates to avoid casts
 - Kaggle CSV in (`read_path`) / Kaggle CSV out (`write_path`)
 
-The main data structure is `City`:
+The main data structure is `City` ([problem.hpp](https://github.com/yafeunteun/kaggle-traveling-santa-2018-prime-paths/blob/master/gpu/src/problem.hpp)):
 ```cpp
 struct City {
     int i;
