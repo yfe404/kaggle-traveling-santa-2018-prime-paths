@@ -45,29 +45,14 @@ void two_opt_pass_gpu_kernel(City<T>* path, int path_size, int** neighbors_idxs,
 
     for (int i = index; i < path_size-2; i += stride) {
         for (int j = 0; j < n_neighbors; ++j) {
-            int nn_j = neighbors_idxs[i][j];
-            int pos_j = -1;
-            int jj = 0;
-
-            // ! This is broken, since we pass an array of city and not of indexes
-            // while (pos_j == -1) {
-            //     if (path[jj] == nn_j) {
-            //         pos_j = jj;
-            //         break;
-            //     }
-            //     jj++;
-            // }
-
-            if (pos_j <= i) continue;
-
-            T s = two_opt_score(&path[0], i, j);
+            if (j <= i) continue;
+            T s = two_opt_score(path, i, j);
             if (s < results[i].delta) {
                 results[i] = {i, j, s};
             }
         }
     }
 }
-
 
 // Host Code
 // ---------
