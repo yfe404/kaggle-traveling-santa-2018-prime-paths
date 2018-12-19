@@ -36,14 +36,35 @@ T two_opt_score(City<T>* path, int k, int l);
 // CUDA Kernels
 // ------------
 
+// /!\ Make sure results is initialized to an array of {0, 0, 0}
 template <typename T>
 __global__
-T two_opt_pass_gpu_kernel(City<T>* path, int path_size, delta_t<T>* results) {
+void two_opt_pass_gpu_kernel(City<T>* path, int path_size, int** neighbors_idxs, int n_neighbors, delta_t<T>* results) {
     int index = blockIdx.x * blockDim.x + threadIdx.x;
     int stride = blockDim.x * gridDim.x;
 
     for (int i = index; i < path_size-2; i += stride) {
+        for (int j = 0; j < n_neighbors; ++j) {
+            int nn_j = neighbors_idxs[i][j];
+            int pos_j = -1;
+            int jj = 0;
 
+            // ! This is broken, since we pass an array of city and not of indexes
+            // while (pos_j == -1) {
+            //     if (path[jj] == nn_j) {
+            //         pos_j = jj;
+            //         break;
+            //     }
+            //     jj++;
+            // }
+
+            if (pos_j <= i) continue;
+
+            T s = two_opt_score(&path[0], i, j);
+            if (s < results[i].delta) {
+                results[i] = {i, j, s};
+            }
+        }
     }
 }
 
@@ -73,82 +94,63 @@ vector<City<T>> two_opt_pass_cpu(vector<City<T>> path, int k) {
     }
 
     // TODO: Maximize profit and apply to new_path
+    auto new_path(path);
 
-    return path;
+    return new_path;
 }
 
 // GPU multi-threaded 2-opt
 template <typename T>
 vector<City<T>> two_opt_pass_gpu(vector<City<T>> path, int k) {
-    // Build k-d tree
     kdt::KDTree<City<T>> kdtree(path);
 
-    // Build NN table
-    // TODO
+    // Build NN table [cityId] -> [NN0, NN1, ......, NNK]
+    int** neighbors_idxs;
+    cudaMallocManaged(&neighbors_idxs, path.size()*sizeof(int*));
 
-    // build query
-    // const City<PRECISION> query(cities[0]);
+    for (size_t i = 0; i < path.size(); ++i) {
+        int* idxs;
+        cudaMallocManaged(&idxs, k*sizeof(int));
 
-    // // k-nearest neigbors search example
-    // const int k = 25;
-    // const std::vector<int> knnIndices = kdtree.knnSearch(query, k);
+        // k+1 because the first one is the point itself
+        // NOTE: Remove this loop and use CUDA memcpy ?
+        auto knnIndices = kdtree.knnSearch(path[i], k+1);
+        for (size_t j = 1; j <= k; ++j) {
+            idxs[i-1] = knnIndices[i];
+        }
 
-    // for (auto i : knnIndices) {
-    //     cout << cities[i].xy.x << endl;
-    // }
+        neighbors_idxs[i] = idxs;
+    }
 
-    //   // Build NN table [cityId] -> [NN0, NN1, ......, NNK]
-    //   int** nearest;
-        
-    //   cudaMallocManaged(&nearest, coords_points.size()*sizeof(int*));
-    //   for(unsigned int i = 0; i < coords_points.size(); ++i) {
-    //     int* neigh;
-    //     cudaMallocManaged(&neigh, k*sizeof(int));
+    // Two-Opt
+    int blockSize = 64;
+    int numBlocks = (path.size() + blockSize - 1) / blockSize;
 
-    //     // build query
-    //     Point query(coords_points[i]);
-    //     // k-nearest neigbors search
-    //     const std::vector<int> knnIndices = kdtree.knnSearch(query, k+1); // k+1 because the first one is the point itself
-    //     for (unsigned int j = 1; j < k+1; ++j) {
-    //       neigh[j-1] = knnIndices[j];
-    //     }
-    //     nearest[i] = neigh;
-        
-    //   }
+    // Will contain the best move as a delta_t struct obj
+    delta_t<T>* results;
+    cudaMallocManaged(&results, (path.size()-3)*sizeof(delta_t<T>));
+    for (size_t i = 0; i < path.size(); ++i) {
+        results[i] = {0, 0, 0};
+    }
 
+    // Copy path to GPU
+    // TODO: Use memcpy instead ?
+    City<T>* gpu_path;
+    cudaMallocManaged(&gpu_path, path.size()*sizeof(City<T>));
+    for (size_t i = 0; i < path.size(); ++i) {
+        gpu_path[i] = path[i];
+    }
 
+    // Call GPU kernel
+    two_opt_pass_gpu_kernel<<<numBlocks, blockSize>>>(
+        gpu_path, path.size(), neighbors_idxs, k, results
+    );
+    cudaDeviceSynchronize();
 
-    //   // Two-Opt
-    //   int blockSize = 64;
-    //   int numBlocks = (path_size + blockSize - 1) / blockSize;
+    // TODO: Maximize profit and apply to new_path
+    auto new_path(path);
 
-    
-    //   bool improved = true;
-    //     delta_t *result; // will contain the best move as a delta_t struct obj. 
-    //     cudaMallocManaged(&result, (path_size-3)*sizeof(delta_t));
-    //     bool *filled; // tells wether a move that improves the score has been found or not
-    //     cudaMallocManaged(&filled, (path_size-3)*sizeof(bool));
-        
-    //     while(improved) {
-    //         improved = false;
-    //         two_opt_step<<<numBlocks, blockSize>>>(coords, result, path_array, path_size, nearest, filled); // after this step, results contains all the pairs that improve path 
-    //         // choose a move in results
-    //         // if a move is chosen, update path, set improved to true, compute/print new total_distance for debugging if necessary
-    //         // else => return;
-        
-    // 	 // Wait for GPU to finish before accessing on host
-    // 	cudaDeviceSynchronize();
-    //         for (int i = 0; i < (path_size-3); ++i){
-    //             if (filled[i]) {
-    //                 std::cout << result[i].delta;
-    //                 break;
-    //             }
-    //         }
-        
-    //     }
-
-    // return 0;
-    return path;
+    return new_path;
 }
 
 int main(int argc, char const *argv[]) {
@@ -180,9 +182,15 @@ int main(int argc, char const *argv[]) {
     cout << "Time: " << chrono::duration_cast<chrono::duration<double> >(finish - start).count() << " seconds" << endl;
     cout << "New score = " << score(new_path) << endl;
 
-    // cout << "2-opt pass (GPU)" << endl;
-    // auto new_path = two_opt_pass_gpu(path, 15);
-    // cout << "New score = " << score(new_path) << endl;
+    cout << "2-opt pass (GPU)" << endl;
+    start = chrono::steady_clock::now();
+    new_path = two_opt_pass_gpu(path, 15);
+    finish = chrono::steady_clock::now();
+    cout << "Time: " << chrono::duration_cast<chrono::duration<double> >(finish - start).count() << " seconds" << endl;
+    cout << "New score = " << score(new_path) << endl;
+
+    // NOTE: I removed the while(improved) loop from the two_opt_pass function,
+    // I think it's better to handle this outside (like here).
 
     write_path(new_path.begin(), new_path.end(), "k_opt_" + to_string(score(new_path)) + ".csv");
     return 0;
