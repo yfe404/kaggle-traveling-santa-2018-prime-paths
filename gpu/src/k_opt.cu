@@ -27,46 +27,46 @@ template <typename T>
 __host__ __device__
 T two_opt_score(City<T>* path, int k, int l);
 
-// template <typename T>
-// __global__
-// void two_opt_step(City<T>* path, double** coords, delta_t* result, int* path, int path_size, int** nearest, bool*filled) {
-
-
-
-//   int index = blockIdx.x * blockDim.x + threadIdx.x;
-//     int stride = blockDim.x * gridDim.x;
-
-  
-//     for(unsigned int i = index; i < path_size-2; i+=stride) {
-//         for(unsigned int j = 0; j < 25; ++j) {
-//             int nn_j = nearest[path[i]][j];
-//             int pos_j = -1;
-//             int jj = 0;
-//             while(pos_j == -1) {
-//                 if(path[jj] == nn_j) {
-//                     pos_j = jj;
-//                     break;
-//                 }
-//                 jj++;
-//             }
-//             if (pos_j <= i) continue;
-// 	    delta_t delta;
-//             delta.i = i;
-//             delta.j = j;
-//             delta.delta = distance(coords, path, path_size, i, pos_j, false) - distance(coords, path, path_size, i, pos_j, true);
-// 	    if(!(filled[i]) && delta.delta > 0) {
-// 	      filled[i] = true;
-// 	      result[i] = delta;
-//             } else if (filled[i] && delta.delta > result[i].delta) {
-// 	      result[i] = delta;
-//             }
-//         }
-//     }
-// }
-
 // Host Code
 // ---------
 
+template <typename T>
+struct delta_t {
+    int i;
+    int j;
+    T delta;
+};
+
+// CPU single-threaded 2-opt
+template <typename T>
+vector<City<T>> two_opt_pass_cpu(vector<City<T>> path, int k) {
+    kdt::KDTree<City<T>> kdtree(path);
+
+    // This is not a greedy 2-opt, instead (like the GPU impl.) we
+    // search for the best 2-opt for each index, and then maximize
+    // the set of non-overlapping 2-opt to apply.
+    vector<delta_t<T>> results;
+
+    for (int i = 1; i < path.size(); i++) {
+        // k+1 because the first one is the point itself
+        vector<int> knnIndices = kdtree.knnSearch(path[i], k+1);
+        delta_t<T> best = {0, 0, 0};
+
+        for (int j : knnIndices) {
+            // TODO: Stop if neighbor well-placed
+            T s = two_opt_score(&path[0], i, j);
+            if (s < best.delta) {
+                best = {i, j, s};
+            }
+        }
+
+        results.push_back(best);
+    }
+
+    return path;
+}
+
+// GPU multi-threaded 2-opt
 template <typename T>
 vector<City<T>> two_opt_pass_gpu(vector<City<T>> path, int k) {
     // Build k-d tree
@@ -160,9 +160,13 @@ int main(int argc, char const *argv[]) {
 
     cout << "Input path score = " << score(path) << endl;
 
-    cout << "2-opt pass" << endl;
-    auto new_path = two_opt_pass_gpu(path, 15);
+    cout << "2-opt pass (CPU)" << endl;
+    auto new_path = two_opt_pass_cpu(path, 15);
     cout << "New score = " << score(new_path) << endl;
+
+    // cout << "2-opt pass (GPU)" << endl;
+    // auto new_path = two_opt_pass_gpu(path, 15);
+    // cout << "New score = " << score(new_path) << endl;
 
     return 0;
 }
