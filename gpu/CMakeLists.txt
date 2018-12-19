@@ -13,6 +13,8 @@ set(CMAKE_CXX_FLAGS "-Wall -Wextra")
 set(CMAKE_CXX_FLAGS_DEBUG "-g")
 set(CMAKE_CXX_FLAGS_RELEASE "-Ofast")
 
+set(CMAKE_CUDA_FLAGS_RELEASE "--optimize=5 --use_fast_math")
+
 # Executables
 add_executable(k_opt src/k_opt.cu)
 
