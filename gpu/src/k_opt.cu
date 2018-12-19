@@ -170,5 +170,6 @@ int main(int argc, char const *argv[]) {
     // auto new_path = two_opt_pass_gpu(path, 15);
     // cout << "New score = " << score(new_path) << endl;
 
+    write_path(new_path.begin(), new_path.end(), "k_opt_" + to_string(score(new_path)) + ".csv");
     return 0;
 }
