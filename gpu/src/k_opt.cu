@@ -10,10 +10,17 @@
 // much faster than double precision on GPUs.
 #define PRECISION float
 
-// CUDA Kernels
-// ------------
+template <typename T>
+struct delta_t {
+    int i;
+    int j;
+    T delta;
+};
 
-// Reuse distance_lp from problem.hpp
+// CUDA Functions
+// --------------
+// Reuse functions from problem.hpp/k_opt.hpp for GPU
+
 template <typename T>
 __host__ __device__
 T distance_l1(Coord<T> a, Coord<T> b);
@@ -22,20 +29,27 @@ template <typename T>
 __host__ __device__
 T distance_l2(Coord<T> a, Coord<T> b);
 
-// Reuse two_opt_score from k_opt.hpp
 template <typename T>
 __host__ __device__
 T two_opt_score(City<T>* path, int k, int l);
 
-// Host Code
-// ---------
+// CUDA Kernels
+// ------------
 
 template <typename T>
-struct delta_t {
-    int i;
-    int j;
-    T delta;
-};
+__global__
+T two_opt_pass_gpu_kernel(City<T>* path, int path_size, delta_t<T>* results) {
+    int index = blockIdx.x * blockDim.x + threadIdx.x;
+    int stride = blockDim.x * gridDim.x;
+
+    for (int i = index; i < path_size-2; i += stride) {
+
+    }
+}
+
+
+// Host Code
+// ---------
 
 // CPU single-threaded 2-opt
 template <typename T>
