@@ -9,25 +9,81 @@
 // much faster than double precision on GPUs.
 #define PRECISION float
 
-// Perform a 2-opt pass on GPU and returns the new path
+// CUDA Kernels
+// ------------
+
+// Reuse distance_lp from problem.hpp
+template <typename T>
+__host__ __device__
+T distance_l1(Coord<T> a, Coord<T> b);
+
+template <typename T>
+__host__ __device__
+T distance_l2(Coord<T> a, Coord<T> b);
+
+// Reuse two_opt_score from k_opt.hpp
+template <typename T>
+__host__ __device__
+T two_opt_score(City<T>* path, int k, int l);
+
+// template <typename T>
+// __global__
+// void two_opt_step(City<T>* path, double** coords, delta_t* result, int* path, int path_size, int** nearest, bool*filled) {
+
+
+
+//   int index = blockIdx.x * blockDim.x + threadIdx.x;
+//     int stride = blockDim.x * gridDim.x;
+
+  
+//     for(unsigned int i = index; i < path_size-2; i+=stride) {
+//         for(unsigned int j = 0; j < 25; ++j) {
+//             int nn_j = nearest[path[i]][j];
+//             int pos_j = -1;
+//             int jj = 0;
+//             while(pos_j == -1) {
+//                 if(path[jj] == nn_j) {
+//                     pos_j = jj;
+//                     break;
+//                 }
+//                 jj++;
+//             }
+//             if (pos_j <= i) continue;
+// 	    delta_t delta;
+//             delta.i = i;
+//             delta.j = j;
+//             delta.delta = distance(coords, path, path_size, i, pos_j, false) - distance(coords, path, path_size, i, pos_j, true);
+// 	    if(!(filled[i]) && delta.delta > 0) {
+// 	      filled[i] = true;
+// 	      result[i] = delta;
+//             } else if (filled[i] && delta.delta > result[i].delta) {
+// 	      result[i] = delta;
+//             }
+//         }
+//     }
+// }
+
+// Host Code
+// ---------
+
 template <typename T>
 vector<City<T>> two_opt_pass_gpu(vector<City<T>> path, int k) {
     // Build k-d tree
-    kdt::KDTree<City<T>> kdtree(cities);
+    kdt::KDTree<City<T>> kdtree(path);
 
     // Build NN table
     // TODO
 
     // build query
-    const City<PRECISION> query(cities[0]);
+    // const City<PRECISION> query(cities[0]);
 
-    // k-nearest neigbors search example
-    const int k = 25;
-    const std::vector<int> knnIndices = kdtree.knnSearch(query, k);
+    // // k-nearest neigbors search example
+    // const int k = 25;
+    // const std::vector<int> knnIndices = kdtree.knnSearch(query, k);
 
-    for (auto i : knnIndices) {
-        cout << cities[i].xy.x << endl;
-    }
+    // for (auto i : knnIndices) {
+    //     cout << cities[i].xy.x << endl;
+    // }
 
     //   // Build NN table [cityId] -> [NN0, NN1, ......, NNK]
     //   int** nearest;
@@ -80,6 +136,7 @@ vector<City<T>> two_opt_pass_gpu(vector<City<T>> path, int k) {
     //     }
 
     // return 0;
+    return path;
 }
 
 int main(int argc, char const *argv[]) {
@@ -103,7 +160,7 @@ int main(int argc, char const *argv[]) {
     cout << "Input path score = " << score(path) << endl;
 
     cout << "2-opt pass" << endl;
-    new_path = two_opt_pass_gpu(path);
+    auto new_path = two_opt_pass_gpu(path, 15);
     cout << "New score = " << score(new_path) << endl;
 
     return 0;
