@@ -2,7 +2,6 @@
 #include <chrono>
 
 #include "problem.hpp"
-#include "kdtree.hpp"
 #include "k_opt.hpp"
 #include "knn.hpp"
 #include "io.hpp"
@@ -11,16 +10,8 @@
 // much faster than double precision on GPUs.
 #define PRECISION float
 
-template <typename T>
-struct delta_t {
-    int i;
-    int j;
-    T delta;
-};
-
-// CUDA Functions
-// --------------
-// Reuse functions from problem.hpp/k_opt.hpp for GPU
+// CPU + GPU Functions
+// -------------------
 
 template <typename T>
 __host__ __device__
@@ -34,6 +25,10 @@ template <typename T>
 __host__ __device__
 T two_opt_score(City<T>* path, int k, int l);
 
+template <typename T>
+__host__ __device__
+void two_opt_results(City<T>* path, int path_size, int** neighbors_idxs, int n_neighbors, delta_t<T>* results, int index, int stride);
+
 // CUDA Kernels
 // ------------
 
@@ -43,17 +38,7 @@ __global__
 void two_opt_pass_gpu_kernel(City<T>* path, int path_size, int** neighbors_idxs, int n_neighbors, delta_t<T>* results) {
     int index = blockIdx.x * blockDim.x + threadIdx.x;
     int stride = blockDim.x * gridDim.x;
-
-    for (int i = index; i < path_size-2; i += stride) {
-        for (int z = 0; z < n_neighbors; ++z) {
-            int j = neighbors_idxs[i][z];
-            if (j <= i) continue;
-            T s = two_opt_score(path, i, j);
-            if (s < results[i].delta) {
-                results[i] = {i, j, s};
-            }
-        }
-    }
+    two_opt_results(path, path_size, neighbors_idxs, n_neighbors, results, index, stride);
 }
 
 // Host Code
@@ -62,23 +47,27 @@ void two_opt_pass_gpu_kernel(City<T>* path, int path_size, int** neighbors_idxs,
 // CPU single-threaded 2-opt
 template <typename T>
 vector<City<T>> two_opt_pass_cpu(vector<City<T>> path, int k) {
-    kdt::KDTree<City<T>> kdtree(path);
+     // Build NN table [cityId] -> [NN0, NN1, ......, NNK]
+     auto neighbors_idxs = get_knn(path, k);
+     int** gpu_neighbors_idxs;
+     cudaMallocManaged(&gpu_neighbors_idxs, path.size()*sizeof(int*));
+ 
+     for (size_t i = 0; i < path.size(); ++i) {
+         gpu_neighbors_idxs[i] = &neighbors_idxs[i][0];
+     }
 
-    // This is not a greedy 2-opt, instead (like the GPU impl.) we
-    // search for the best 2-opt for each index, and then maximize
-    // the set of non-overlapping 2-opt to apply.
-    vector<delta_t<T>> results(path.size(), {0, 0, 0});
+    //  auto neigh
 
-    for (int i = 1; i < path.size(); i++) {
-        // k+1 because the first one is the point itself
-        for (int j : kdtree.knnSearch(path[i], k+1)) {
-            // TODO: Stop if neighbor well-placed
-            T s = two_opt_score(&path[0], i, j);
-            if (s < results[i].delta) {
-                results[i] = {i, j, s};
-            }
-        }
+
+    // Will contain the best move as a delta_t struct obj
+    delta_t<T>* results = (delta_t<T>*)malloc((path.size()-3)*sizeof(delta_t<T>));
+    for (size_t i = 0; i < path.size(); ++i) {
+        results[i] = {0, 0, 0};
     }
+
+    // vector<delta_t<T>> results(path.size(), {0, 0, 0});
+
+    two_opt_results(&path[0], path.size(), neighbors_idxs, k, results, 0, 1);
 
     // TODO: Maximize profit and apply to new_path
     auto new_path(path);

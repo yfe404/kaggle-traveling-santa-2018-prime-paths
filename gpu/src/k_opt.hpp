@@ -7,6 +7,13 @@
 // -----
 
 template <typename T>
+struct delta_t {
+    int i;
+    int j;
+    T delta;
+};
+
+template <typename T>
 T two_opt_score(City<T>* path, int k, int l) {
     // before: a k ... l b
     // after:  a l ... k b
@@ -39,6 +46,23 @@ T two_opt_score(City<T>* path, int k, int l) {
     }
 
     return diff + penalties_diff*0.1;
+}
+
+template <typename T>
+void two_opt_results(City<T>* path, int path_size, int** neighbors_idxs, int n_neighbors, delta_t<T>* results, int index, int stride) {
+    // This is not a greedy 2-opt, instead we search for 
+    // the best 2-opt for each index, and then maximize
+    // the set of non-overlapping 2-opt to apply.
+    for (int i = index; i < path_size-2; i += stride) {
+        for (int z = 0; z < n_neighbors; ++z) {
+            int j = neighbors_idxs[i][z];
+            if (j <= i) continue;
+            T s = two_opt_score(path, i, j);
+            if (s < results[i].delta) {
+                results[i] = {i, j, s};
+            }
+        }
+    }
 }
 
 // 3-opt
